@@ -815,8 +815,17 @@ body {
 }
 
 .lang-opt .flag {
-  font-size: 1.1rem;
-  line-height: 1;
+  display: inline-flex;
+  height: 18px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(128, 128, 128, 0.35);
+}
+.lang-opt .flag svg {
+  display: block;
+  height: 18px;
+  width: auto;
 }
 
 .settings-info {
@@ -1102,7 +1111,7 @@ a.contact-link:active {
       </div>
 
       <div class="address-box" id="emailBox">
-        <code id="emailAddress" data-i18n="preparing">Menyiapkan…</code>
+        <code id="emailAddress">Menyiapkan…</code>
       </div>
 
       <div class="action-row">
@@ -1211,11 +1220,11 @@ a.contact-link:active {
           <div class="settings-label" data-i18n="language">Bahasa</div>
           <div class="lang-opts">
             <button type="button" class="lang-opt" data-lang="id" id="langId">
-              <span class="flag">🇮🇩</span>
+              <span class="flag" aria-hidden="true"><svg viewBox="0 0 3 2" width="27" height="18" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="1" fill="#CE1126"/><rect y="1" width="3" height="1" fill="#fff"/></svg></span>
               <span>Indonesia</span>
             </button>
             <button type="button" class="lang-opt" data-lang="en" id="langEn">
-              <span class="flag">🇬🇧</span>
+              <span class="flag" aria-hidden="true"><svg viewBox="0 0 60 30" width="36" height="18" xmlns="http://www.w3.org/2000/svg"><clipPath id="ukS"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="ukT"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#ukS)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#ukT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg></span>
               <span>English</span>
             </button>
           </div>
@@ -1457,13 +1466,16 @@ function applyLang() {
   if (gateRetry) gateRetry.textContent = t('retry');
   const blockRetry = $('#blockRetry');
   if (blockRetry) blockRetry.textContent = t('reload');
-  // only update preparing if no email yet
-  if (!state.email && emailEl && (emailEl.textContent === 'Menyiapkan…' || emailEl.textContent === 'Preparing…' || emailEl.textContent.includes('…') || emailEl.textContent.includes('...'))) {
-    // leave dynamic states alone; apply via data-i18n only when still default
-  }
-  if (emailEl && !state.email && !emailEl.textContent.includes('@')) {
-    const failTexts = [t('failCreate'), t('failConnect'), 'Gagal membuat email', 'Gagal terhubung', 'Failed to create email', 'Failed to connect'];
-    if (!failTexts.includes(emailEl.textContent)) emailEl.textContent = t('preparing');
+  // alamat email: jangan pernah ditimpa teks "Menyiapkan…" kalau sudah ada alamat
+  if (emailEl) {
+    if (state.email) {
+      if (emailEl.textContent !== state.email) emailEl.textContent = state.email;
+    } else if (!emailEl.textContent.includes('@')) {
+      const failTexts = [I18N.id.failCreate, I18N.en.failCreate, I18N.id.failConnect, I18N.en.failConnect];
+      if (!failTexts.includes(emailEl.textContent)) emailEl.textContent = t('preparing');
+      else if (emailEl.textContent === I18N.id.failCreate || emailEl.textContent === I18N.en.failCreate) emailEl.textContent = t('failCreate');
+      else emailEl.textContent = t('failConnect');
+    }
   }
   // meta description
   const meta = document.querySelector('meta[name="description"]');
@@ -2181,7 +2193,6 @@ if (savedTheme) applyTheme(savedTheme);
 function openSettings() {
   settingsBackdrop.hidden = false;
   requestAnimationFrame(() => settingsBackdrop.classList.add('open'));
-  applyLang();
 }
 
 function closeSettings() {
