@@ -1,4 +1,5 @@
 const auth = require('./_auth');
+const { shield } = require('./_shield');
 
 const ALLOWED_FN = new Set([
   'get_email_address', 'set_email_user', 'check_email',
@@ -15,6 +16,7 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (!(await shield(req, res, { name: 'gm', limit: 90 }))) return;
   if (!auth.guard(req, res)) return;
 
   const f = String(req.query.f || '');
