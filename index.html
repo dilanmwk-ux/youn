@@ -1152,10 +1152,24 @@ function renderInbox() {
   }
 }
 
-const BLOCKED_TAGS = 'script,iframe,frame,frameset,object,embed,applet,form,input,button,select,textarea,link,meta,base,audio,video,source,track,svg,math,noscript,template,portal';
+const BLOCKED_TAGS = 'script,iframe,frame,frameset,object,embed,applet,form,input,button,select,textarea,link,meta,base,audio,video,source,track,math,noscript,template,portal,foreignObject,use,animate,set,animateTransform';
+
+function proxied(u) {
+  u = String(u || '').trim().replace(/^['"]|['"]$/g, '');
+  if (u.startsWith('//')) u = 'https:' + u;
+  if (/^https?:\/\//i.test(u)) return location.origin + '/api/proxy?url=' + encodeURIComponent(u);
+  if (/^data:image\//i.test(u)) return u;
+  return null;
+}
 
 function cleanCss(css) {
-  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/expression\s*\(/gi, '(');
+  return String(css)
+    .replace(/@import[^;]*;?/gi, '')
+    .replace(/url\s*\(([^)]*)\)/gi, (m, u) => {
+      const p = proxied(u);
+      return p ? 'url("' + p + '")' : 'none';
+    })
+    .replace(/expression\s*\(/gi, '(');
 }
 
 function buildEmailDoc(html) {
@@ -1169,8 +1183,11 @@ function buildEmailDoc(html) {
     for (const a of [...el.attributes]) {
       const n = a.name.toLowerCase();
       const v = a.value;
-      if (n.startsWith('on') || n === 'srcdoc' || n === 'srcset' || n === 'formaction' || n === 'background' || n === 'ping') {
+      if (n.startsWith('on') || n === 'srcdoc' || n === 'formaction' || n === 'ping') {
         el.removeAttribute(a.name);
+      } else if (n === 'background') {
+        const pb = proxied(v);
+        if (pb) el.setAttribute('background', pb); else el.removeAttribute('background');
       } else if (n === 'style') {
         el.setAttribute('style', cleanCss(v));
       } else if (n === 'href' || n === 'xlink:href') {
@@ -1183,12 +1200,16 @@ function buildEmailDoc(html) {
     }
     if (el.tagName === 'IMG') {
       let src = (el.getAttribute('src') || '').trim();
-      if (src.startsWith('//')) src = 'https:' + src;
-      if (/^https?:\/\//i.test(src)) {
-        el.setAttribute('src', location.origin + '/api/proxy?url=' + encodeURIComponent(src));
-      } else if (!/^data:image\/(png|jpe?g|gif|webp);/i.test(src)) {
-        el.removeAttribute('src');
+      if (!src) {
+        const ss = (el.getAttribute('srcset') || '').trim().split(',')[0] || '';
+        src = ss.trim().split(/\s+/)[0] || '';
       }
+      el.removeAttribute('srcset');
+      const px = proxied(src);
+      if (px) el.setAttribute('src', px); else el.removeAttribute('src');
+      // alt berupa nama file / URL (mis. pixel pelacak) disembunyikan, bukan ditampilkan besar
+      const alt = el.getAttribute('alt') || '';
+      if (alt && !/\s/.test(alt) && /[.=?\/]/.test(alt)) el.setAttribute('alt', '');
       el.setAttribute('referrerpolicy', 'no-referrer');
       el.setAttribute('loading', 'lazy');
     }
