@@ -1,7 +1,7 @@
 const dns = require('dns').promises;
 const net = require('net');
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 4 * 1024 * 1024;
 const MAX_REDIRECTS = 3;
 
 function isPrivateV4(ip) {
@@ -45,6 +45,22 @@ async function assertPublic(u) {
   }
 }
 
+function sniffImage(b, declared) {
+  if (b.length < 4) return null;
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'image/png';
+  if (b[0] === 0xff && b[1] === 0xd8) return 'image/jpeg';
+  if (b.slice(0, 3).toString() === 'GIF') return 'image/gif';
+  if (b.slice(0, 4).toString() === 'RIFF' && b.slice(8, 12).toString() === 'WEBP') return 'image/webp';
+  if (b[0] === 0 && b[1] === 0 && b[2] === 1 && b[3] === 0) return 'image/x-icon';
+  if (b[0] === 0x42 && b[1] === 0x4d) return 'image/bmp';
+  if (b.slice(4, 8).toString() === 'ftyp' && /avif|avis/.test(b.slice(8, 16).toString())) return 'image/avif';
+  const head = b.slice(0, 512).toString('utf8').toLowerCase();
+  if (head.includes('<svg') && (declared.includes('svg') || declared.includes('xml') || declared.startsWith('text/') || declared.includes('octet'))) {
+    return 'image/svg+xml'; // aman: respons membawa CSP sandbox + nosniff, jadi script tidak jalan
+  }
+  return null;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -68,7 +84,10 @@ module.exports = async function handler(req, res) {
     for (let i = 0; i <= MAX_REDIRECTS; i++) {
       await assertPublic(target);
       upstream = await fetch(target.toString(), {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TempMailProxy/1.0)', Accept: 'image/*' },
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36',
+          Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        },
         redirect: 'manual',
         signal: ctrl.signal,
       });
@@ -82,16 +101,15 @@ module.exports = async function handler(req, res) {
 
     if (!upstream.ok) return res.status(502).json({ error: 'Upstream ' + upstream.status });
 
-    const contentType = (upstream.headers.get('content-type') || '').toLowerCase();
-    // SVG sengaja diblok: kalau dibuka langsung di domain ini bisa menjalankan script (XSS)
-    const okType = /^image\/(png|jpe?g|gif|webp|avif|bmp|x-icon|vnd\.microsoft\.icon)/.test(contentType);
-    if (!okType) return res.status(415).json({ error: 'Not a supported image' });
-
     const declared = Number(upstream.headers.get('content-length') || 0);
     if (declared > MAX_BYTES) return res.status(413).json({ error: 'Too large' });
 
     const buf = Buffer.from(await upstream.arrayBuffer());
     if (buf.length > MAX_BYTES) return res.status(413).json({ error: 'Too large' });
+
+    // Tipe ditentukan dari isi file (banyak CDN salah kirim content-type)
+    const contentType = sniffImage(buf, (upstream.headers.get('content-type') || '').toLowerCase());
+    if (!contentType) return res.status(415).json({ error: 'Not a supported image' });
 
     res.setHeader('Content-Type', contentType.split(';')[0]);
     res.setHeader('X-Content-Type-Options', 'nosniff');
