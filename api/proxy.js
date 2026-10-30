@@ -1,5 +1,6 @@
 const dns = require('dns').promises;
 const auth = require('./_auth');
+const { shield } = require('./_shield');
 const net = require('net');
 
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -64,6 +65,7 @@ function sniffImage(b, declared) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (!(await shield(req, res, { name: 'proxy', limit: 240 }))) return;
   if (!auth.guard(req, res)) return;
 
   const raw = req.query.url;
