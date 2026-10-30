@@ -55,7 +55,7 @@ function sniffImage(b, declared) {
   if (b[0] === 0 && b[1] === 0 && b[2] === 1 && b[3] === 0) return 'image/x-icon';
   if (b[0] === 0x42 && b[1] === 0x4d) return 'image/bmp';
   if (b.slice(4, 8).toString() === 'ftyp' && /avif|avis/.test(b.slice(8, 16).toString())) return 'image/avif';
-  const head = b.slice(0, 512).toString('utf8').toLowerCase();
+  const head = b.slice(0, 2048).toString('utf8').toLowerCase();
   if (head.includes('<svg') && (declared.includes('svg') || declared.includes('xml') || declared.startsWith('text/') || declared.includes('octet'))) {
     return 'image/svg+xml'; // aman: respons membawa CSP sandbox + nosniff, jadi script tidak jalan
   }
@@ -85,15 +85,20 @@ module.exports = async function handler(req, res) {
     let upstream;
     for (let i = 0; i <= MAX_REDIRECTS; i++) {
       await assertPublic(target);
+      const baseHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36',
+        Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      };
+      // 1) dengan Referer situs asalnya (lolos anti-hotlink), 2) kalau ditolak coba tanpa Referer
       upstream = await fetch(target.toString(), {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36',
-          Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-          Referer: target.origin + '/',
-        },
+        headers: { ...baseHeaders, Referer: target.origin + '/' },
         redirect: 'manual',
         signal: ctrl.signal,
       });
+      if ([400, 401, 403, 404, 406].includes(upstream.status)) {
+        const second = await fetch(target.toString(), { headers: baseHeaders, redirect: 'manual', signal: ctrl.signal });
+        if (second.ok || (second.status >= 300 && second.status < 400)) upstream = second;
+      }
       if (upstream.status >= 300 && upstream.status < 400 && upstream.headers.get('location')) {
         if (i === MAX_REDIRECTS) return res.status(508).json({ error: 'Too many redirects' });
         target = new URL(upstream.headers.get('location'), target);
