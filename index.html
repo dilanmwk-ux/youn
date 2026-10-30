@@ -773,6 +773,7 @@ body {
 #cfBox { display: flex; justify-content: center; min-height: 66px; }
 .gate-err { color: var(--warn) !important; margin: 12px 0 0 !important; min-height: 1.2em; }
 .gate-card .btn-ghost { margin-top: 10px; }
+.block-scr { z-index: 300; }
 
 /* Logo pengirim di avatar */
 .msg-av.has-logo {
@@ -968,6 +969,18 @@ body {
     </div>
   </div>
 
+  <div class="gate block-scr" id="blockScr" hidden>
+    <div class="gate-card">
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M16 3l11 4v8c0 7-4.6 11.6-11 14C9.6 26.6 5 22 5 15V7l11-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M11 11l10 10M21 11L11 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h2 id="blockTitle">Akses ditolak</h2>
+      <p id="blockMsg"></p>
+      <button type="button" class="btn-ghost" id="blockRetry">Muat ulang</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status"></div>
 
   <script>
@@ -1028,11 +1041,34 @@ function esc(s) {
   return d.innerHTML;
 }
 
+const BLOCK_TEXT = {
+  vpn: ['VPN / proxy terdeteksi', 'Matikan VPN, proxy, atau DNS pribadi Anda lalu muat ulang halaman ini.'],
+  bot: ['Trafik otomatis terdeteksi', 'Permintaan Anda terlihat seperti bot. Buka lewat browser atau aplikasi biasa.'],
+};
+function showBlock(reason) {
+  const [t, m] = BLOCK_TEXT[reason] || BLOCK_TEXT.bot;
+  $('#blockTitle').textContent = t;
+  $('#blockMsg').textContent = m;
+  $('#blockScr').hidden = false;
+}
+$('#blockRetry').addEventListener('click', () => location.reload());
+
 async function fetchJson(url, ms = 12000, headers = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
+  headers = { ...headers, 'x-tm-wd': navigator.webdriver ? '1' : '0' };
   try {
     const res = await fetch(url, { method: 'GET', credentials: 'omit', signal: ctrl.signal, cache: 'no-store', headers });
+    if (res.status === 403) {
+      const j = await res.json().catch(() => ({}));
+      if (j.error === 'blocked') {
+        showBlock(j.reason);
+        const err = new Error('Akses ditolak');
+        err.blocked = true;
+        throw err;
+      }
+    }
+    if (res.status === 429) throw new Error('Terlalu banyak permintaan, tunggu sebentar');
     if (res.status === 401) {
       const err = new Error('Verifikasi diperlukan');
       err.captcha = true;
@@ -1102,6 +1138,8 @@ function showGate(siteKey) {
               credentials: 'omit',
             });
             const j = await r.json().catch(() => ({}));
+            if (r.status === 403 && j.error === 'blocked') { gateEl.hidden = true; return showBlock(j.reason); }
+            if (r.status === 429) throw new Error('Terlalu banyak percobaan, tunggu sebentar');
             if (!r.ok || !j.ok) throw new Error(j.error || 'Verifikasi gagal, coba lagi');
             setTok(j.token);
             gateEl.hidden = true;
@@ -1673,10 +1711,13 @@ if (savedTheme) applyTheme(savedTheme);
 /* Boot */
 (async () => {
   try {
+    if (navigator.webdriver) return showBlock('bot');
+    await fetchJson('/api/verify'); // cek bot / VPN lebih dulu, sebelum captcha
     await ensureCaptcha();
     const ok = await restore();
     if (!ok) await createEmail();
   } catch (e) {
+    if (e.blocked) return;
     emailEl.textContent = 'Gagal terhubung';
     toast(e.message || 'Error', 'err');
     console.error(e);
