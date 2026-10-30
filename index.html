@@ -746,17 +746,38 @@ body {
 }
 
 /* Isi email HTML dirender di iframe terisolasi */
-.sheet-content.frame { padding: 0; overflow: hidden; }
+.sheet-content.frame {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(88dvh - 215px);
+  min-height: 240px;
+  flex: none;
+}
 .sheet-content.frame iframe {
   display: block;
   width: 100%;
-  height: calc(88dvh - 215px);
-  min-height: 220px;
+  flex: 1;
+  min-height: 0;
   border: 0;
   background: #fff;
 }
+.img-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.76rem;
+  color: var(--text-2);
+}
+.img-bar span { flex: 1 1 100%; }
+.img-bar .btn-ghost { padding: 7px 10px; font-size: 0.76rem; }
 @media (min-width: 480px) {
-  .sheet-content.frame iframe { height: calc(78vh - 215px); }
+  .sheet-content.frame { height: calc(78vh - 215px); }
 }
 
 /* HTML email body (hanya untuk teks biasa) */
@@ -908,6 +929,7 @@ const state = {
   seq: 0,
   messages: [],
   currentId: null,
+  curBody: '',
   auto: true,
   timer: null,
 };
@@ -1154,30 +1176,36 @@ function renderInbox() {
 
 const BLOCKED_TAGS = 'script,iframe,frame,frameset,object,embed,applet,form,input,button,select,textarea,link,meta,base,audio,video,source,track,math,noscript,template,portal,foreignObject,use,animate,set,animateTransform';
 
-function proxied(u) {
+// mode: 'none' = tidak ada gambar remote | 'proxy' = lewat server (IP tersembunyi) | 'direct' = langsung (IP terlihat)
+function remoteImg(u, mode, ctr) {
   u = String(u || '').trim().replace(/^['"]|['"]$/g, '');
-  if (u.startsWith('//')) u = 'https:' + u;
-  if (/^https?:\/\//i.test(u)) return location.origin + '/api/proxy?url=' + encodeURIComponent(u);
   if (/^data:image\//i.test(u)) return u;
+  if (u.startsWith('//')) u = 'https:' + u;
+  if (/^http:\/\//i.test(u)) u = 'https://' + u.slice(7);
+  if (!/^https:\/\//i.test(u)) return null;
+  ctr.n++;
+  if (mode === 'proxy') return location.origin + '/api/proxy?url=' + encodeURIComponent(u);
+  if (mode === 'direct') return u.replace(/["'()\s]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   return null;
 }
 
-function cleanCss(css) {
+function cleanCss(css, mode, ctr) {
   return String(css)
     .replace(/@import[^;]*;?/gi, '')
     .replace(/url\s*\(([^)]*)\)/gi, (m, u) => {
-      const p = proxied(u);
+      const p = remoteImg(u, mode, ctr);
       return p ? 'url("' + p + '")' : 'none';
     })
     .replace(/expression\s*\(/gi, '(');
 }
 
-function buildEmailDoc(html) {
+function buildEmailDoc(html, mode) {
+  const ctr = { n: 0 };
   // DOMParser = dokumen inert: script tidak jalan & resource tidak dimuat saat parsing
   const doc = new DOMParser().parseFromString(html, 'text/html');
   doc.querySelectorAll(BLOCKED_TAGS).forEach((n) => n.remove());
 
-  doc.querySelectorAll('style').forEach((st) => { st.textContent = cleanCss(st.textContent); });
+  doc.querySelectorAll('style').forEach((st) => { st.textContent = cleanCss(st.textContent, mode, ctr); });
 
   doc.querySelectorAll('*').forEach((el) => {
     for (const a of [...el.attributes]) {
@@ -1186,10 +1214,10 @@ function buildEmailDoc(html) {
       if (n.startsWith('on') || n === 'srcdoc' || n === 'formaction' || n === 'ping') {
         el.removeAttribute(a.name);
       } else if (n === 'background') {
-        const pb = proxied(v);
+        const pb = remoteImg(v, mode, ctr);
         if (pb) el.setAttribute('background', pb); else el.removeAttribute('background');
       } else if (n === 'style') {
-        el.setAttribute('style', cleanCss(v));
+        el.setAttribute('style', cleanCss(v, mode, ctr));
       } else if (n === 'href' || n === 'xlink:href') {
         if (!/^\s*(https?:|mailto:|tel:|#)/i.test(v)) el.removeAttribute(a.name);
       }
@@ -1205,9 +1233,9 @@ function buildEmailDoc(html) {
         src = ss.trim().split(/\s+/)[0] || '';
       }
       el.removeAttribute('srcset');
-      const px = proxied(src);
+      const px = remoteImg(src, mode, ctr);
       if (px) el.setAttribute('src', px); else el.removeAttribute('src');
-      // alt berupa nama file / URL (mis. pixel pelacak) disembunyikan, bukan ditampilkan besar
+      // alt berupa nama file / URL (mis. pixel pelacak) disembunyikan
       const alt = el.getAttribute('alt') || '';
       if (alt && !/\s/.test(alt) && /[.=?\/]/.test(alt)) el.setAttribute('alt', '');
       el.setAttribute('referrerpolicy', 'no-referrer');
@@ -1215,13 +1243,50 @@ function buildEmailDoc(html) {
     }
   });
 
-  const styles = [...doc.head.querySelectorAll('style')].map((s) => s.outerHTML).join('');
-  return '<!DOCTYPE html><html><head><meta charset="utf-8">'
-    + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data: ' + location.origin + '; style-src \'unsafe-inline\'">'
+  const imgSrc = mode === 'proxy' ? 'data: ' + location.origin : mode === 'direct' ? 'data: https:' : 'data:';
+  const styles = [...doc.head.querySelectorAll('style')].map((x) => x.outerHTML).join('');
+  const out = '<!DOCTYPE html><html><head><meta charset="utf-8">'
+    + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src ' + imgSrc + '; style-src \'unsafe-inline\'">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1">'
     + '<base target="_blank">'
     + '<style>html{background:#fff}body{margin:0;padding:14px 16px;color:#111;font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img{max-width:100%!important;height:auto!important}table{max-width:100%!important}a{color:#2563eb}</style>'
     + styles + '</head><body>' + doc.body.innerHTML + '</body></html>';
+  return { html: out, imgs: ctr.n };
+}
+
+function renderHtmlMail(mode) {
+  const box = $('#sheetBody');
+  const { html, imgs } = buildEmailDoc(state.curBody, mode);
+  const fr = document.createElement('iframe');
+  fr.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
+  fr.setAttribute('referrerpolicy', 'no-referrer');
+  fr.setAttribute('title', 'Isi email');
+  fr.srcdoc = html;
+
+  box.classList.add('frame');
+  box.replaceChildren();
+
+  if (imgs > 0 && mode !== 'direct') {
+    const bar = document.createElement('div');
+    bar.className = 'img-bar';
+    const t = document.createElement('span');
+    t.textContent = mode === 'none'
+      ? 'Gambar diblokir — IP kamu aman.'
+      : 'Lewat proxy — IP kamu tersembunyi. Gambar kosong?';
+    bar.appendChild(t);
+    const mk = (label, m, cls) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn-ghost ' + (cls || '');
+      b.textContent = label;
+      b.addEventListener('click', () => renderHtmlMail(m));
+      bar.appendChild(b);
+    };
+    if (mode === 'none') mk('Muat gambar (privat)', 'proxy');
+    mk('Muat langsung (IP terlihat)', 'direct', 'danger');
+    box.appendChild(bar);
+  }
+  box.appendChild(fr);
 }
 
 async function openMsg(id) {
@@ -1245,13 +1310,8 @@ async function openMsg(id) {
 
     const body = String(data.mail_body || data.mail_excerpt || '(Kosong)');
     if (/<[a-z][\s\S]*>/i.test(body)) {
-      const fr = document.createElement('iframe');
-      fr.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
-      fr.setAttribute('referrerpolicy', 'no-referrer');
-      fr.setAttribute('title', 'Isi email');
-      fr.srcdoc = buildEmailDoc(body);
-      box.classList.add('frame');
-      box.replaceChildren(fr);
+      state.curBody = body;
+      renderHtmlMail('none');
     } else {
       box.innerHTML = `<pre>${esc(body)}</pre>`;
     }
