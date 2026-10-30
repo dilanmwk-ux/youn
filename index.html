@@ -1423,6 +1423,7 @@ const state = {
   curBody: '',
   auto: true,
   timer: null,
+  fail: 0,
   lang: 'id',
 };
 
@@ -1549,7 +1550,11 @@ async function fetchJson(url, ms = 12000, headers = {}) {
         throw err;
       }
     }
-    if (res.status === 429) throw new Error('Terlalu banyak permintaan, tunggu sebentar');
+    if (res.status === 429) {
+      const err = new Error('Terlalu banyak permintaan, tunggu sebentar');
+      err.rate = true;
+      throw err;
+    }
     if (res.status === 401) {
       const err = new Error('Verifikasi diperlukan');
       err.captcha = true;
@@ -1788,7 +1793,8 @@ async function checkMail(silent = false) {
   try {
     const data = await gm({ f: 'check_email', seq: state.seq });
     if (sid !== state.sid) return; // sesi sudah diganti (tombol Baru), abaikan hasil lama
-    if (data.list && Array.isArray(data.list)) {
+    if (data && Array.isArray(data.list)) {
+      state.fail = 0;
       // Guerrilla returns newest first sometimes; merge by mail_id
       const map = new Map(state.messages.map((m) => [String(m.mail_id), m]));
       for (const m of data.list) {
@@ -1802,12 +1808,38 @@ async function checkMail(silent = false) {
       save();
       msgCount.textContent = String(state.messages.length);
       renderInbox();
+    } else {
+      throw new Error('Sesi tidak valid');
     }
   } catch (e) {
+    if (sid === state.sid && !e.blocked) {
+      state.fail += 1;
+      // sesi Guerrilla habis / balasan kosong: pasang ulang sesi & alamat yang sama
+      if (!e.rate && state.fail >= 2 && state.fail % 2 === 0) healSession();
+      // gagal berulang saat auto-refresh: beri tahu pengguna (dulu diam saja)
+      if (silent && state.fail === 3) toast(e.message || t('failInbox'), 'err');
+    }
     if (!silent) toast(t('failInbox'), 'err');
     console.error(e);
   } finally {
     btn.classList.remove('spinning');
+  }
+}
+
+let healing = false;
+async function healSession() {
+  if (healing || !state.email) return;
+  healing = true;
+  try {
+    const d = await gm({ f: 'get_email_address', lang: 'en' });
+    if (d.sid_token) state.sid = d.sid_token;
+    const r = await gm({ f: 'set_email_user', email_user: state.email.split('@')[0], lang: 'en' });
+    if (r.sid_token) state.sid = r.sid_token;
+    save();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    healing = false;
   }
 }
 
@@ -1957,7 +1989,7 @@ function buildEmailDoc(html, mode) {
     }
   });
 
-  const imgSrc = mode === 'none' ? 'data:' : 'data: https:';
+  const imgSrc = mode === 'none' ? 'data:' : "data: https: 'self'";
   const styles = [...doc.head.querySelectorAll('style')].map((x) => x.outerHTML).join('');
   const out = '<!DOCTYPE html><html><head><meta charset="utf-8">'
     + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src ' + imgSrc + '; style-src \'unsafe-inline\'">'
@@ -2077,6 +2109,7 @@ let pollGen = 0;
 
 function startPoll() {
   stopPoll();
+  state.fail = 0;
   if (!state.auto) return;
   const gen = ++pollGen;
   // Cepat saat inbox kosong (nunggu OTP), pelan sedikit kalau sudah ada pesan
@@ -2084,7 +2117,7 @@ function startPoll() {
     if (gen !== pollGen) return;
     if (!document.hidden) await checkMail(true);
     if (gen !== pollGen || !state.auto) return;
-    state.timer = setTimeout(tick, state.messages.length === 0 ? 2000 : 4000);
+    state.timer = setTimeout(tick, state.fail >= 3 ? 8000 : state.messages.length === 0 ? 2000 : 4000);
   };
   state.timer = setTimeout(tick, 1500);
 }
