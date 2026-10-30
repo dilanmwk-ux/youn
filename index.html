@@ -432,7 +432,7 @@ body {
   text-transform: uppercase;
 }
 
-.msg-body { flex: 1; min-width: 0; }
+.msg-body { flex: 1; min-width: 0; overflow: hidden; }
 
 .msg-row {
   display: flex;
@@ -442,6 +442,8 @@ body {
 }
 
 .msg-from {
+  flex: 1;
+  min-width: 0;
   font-weight: 600;
   font-size: 0.88rem;
   white-space: nowrap;
@@ -535,6 +537,7 @@ body {
 }
 
 .sheet-subject {
+  overflow-wrap: anywhere;
   font-size: 1.05rem;
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -742,7 +745,21 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-/* HTML email body */
+/* Isi email HTML dirender di iframe terisolasi */
+.sheet-content.frame { padding: 0; overflow: hidden; }
+.sheet-content.frame iframe {
+  display: block;
+  width: 100%;
+  height: calc(88dvh - 215px);
+  min-height: 220px;
+  border: 0;
+  background: #fff;
+}
+@media (min-width: 480px) {
+  .sheet-content.frame iframe { height: calc(78vh - 215px); }
+}
+
+/* HTML email body (hanya untuk teks biasa) */
 .sheet-content img {
   max-width: 100% !important;
   height: auto !important;
@@ -795,7 +812,7 @@ body {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="16" height="16">
             <rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/>
           </svg>
-          Salin
+          <span id="copyLbl">Salin</span>
         </button>
         <button type="button" class="act" id="btnRefresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="16" height="16">
@@ -895,6 +912,12 @@ const state = {
   timer: null,
 };
 
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
 const $ = (s) => document.querySelector(s);
 const emailEl = $('#emailAddress');
 const domainHint = $('#domainHint');
@@ -960,18 +983,16 @@ async function gm(params) {
 }
 
 function save() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify({
-      sid: state.sid,
-      email: state.email,
-      seq: state.seq,
-    }));
-  } catch {}
+  store.set(KEY, JSON.stringify({
+    sid: state.sid,
+    email: state.email,
+    seq: state.seq,
+  }));
 }
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = store.get(KEY);
     if (!raw) return false;
     const d = JSON.parse(raw);
     if (!d.sid || !d.email) return false;
@@ -1063,7 +1084,7 @@ async function restore() {
     startPoll();
     return true;
   } catch {
-    localStorage.removeItem(KEY);
+    store.del(KEY);
     state.sid = null;
     return false;
   }
@@ -1071,11 +1092,13 @@ async function restore() {
 
 async function checkMail(silent = false) {
   if (!state.sid) return;
+  const sid = state.sid;
   const btn = $('#btnRefresh');
   if (!silent) btn.classList.add('spinning');
 
   try {
     const data = await gm({ f: 'check_email', seq: state.seq });
+    if (sid !== state.sid) return; // sesi sudah diganti (tombol Baru), abaikan hasil lama
     if (data.list && Array.isArray(data.list)) {
       // Guerrilla returns newest first sometimes; merge by mail_id
       const map = new Map(state.messages.map((m) => [String(m.mail_id), m]));
@@ -1129,6 +1152,57 @@ function renderInbox() {
   }
 }
 
+const BLOCKED_TAGS = 'script,iframe,frame,frameset,object,embed,applet,form,input,button,select,textarea,link,meta,base,audio,video,source,track,svg,math,noscript,template,portal';
+
+function cleanCss(css) {
+  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/expression\s*\(/gi, '(');
+}
+
+function buildEmailDoc(html) {
+  // DOMParser = dokumen inert: script tidak jalan & resource tidak dimuat saat parsing
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll(BLOCKED_TAGS).forEach((n) => n.remove());
+
+  doc.querySelectorAll('style').forEach((st) => { st.textContent = cleanCss(st.textContent); });
+
+  doc.querySelectorAll('*').forEach((el) => {
+    for (const a of [...el.attributes]) {
+      const n = a.name.toLowerCase();
+      const v = a.value;
+      if (n.startsWith('on') || n === 'srcdoc' || n === 'srcset' || n === 'formaction' || n === 'background' || n === 'ping') {
+        el.removeAttribute(a.name);
+      } else if (n === 'style') {
+        el.setAttribute('style', cleanCss(v));
+      } else if (n === 'href' || n === 'xlink:href') {
+        if (!/^\s*(https?:|mailto:|tel:|#)/i.test(v)) el.removeAttribute(a.name);
+      }
+    }
+    if (el.tagName === 'A') {
+      el.setAttribute('target', '_blank');
+      el.setAttribute('rel', 'noopener noreferrer nofollow');
+    }
+    if (el.tagName === 'IMG') {
+      let src = (el.getAttribute('src') || '').trim();
+      if (src.startsWith('//')) src = 'https:' + src;
+      if (/^https?:\/\//i.test(src)) {
+        el.setAttribute('src', location.origin + '/api/proxy?url=' + encodeURIComponent(src));
+      } else if (!/^data:image\/(png|jpe?g|gif|webp);/i.test(src)) {
+        el.removeAttribute('src');
+      }
+      el.setAttribute('referrerpolicy', 'no-referrer');
+      el.setAttribute('loading', 'lazy');
+    }
+  });
+
+  const styles = [...doc.head.querySelectorAll('style')].map((s) => s.outerHTML).join('');
+  return '<!DOCTYPE html><html><head><meta charset="utf-8">'
+    + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data: ' + location.origin + '; style-src \'unsafe-inline\'">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    + '<base target="_blank">'
+    + '<style>html{background:#fff}body{margin:0;padding:14px 16px;color:#111;font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img{max-width:100%!important;height:auto!important}table{max-width:100%!important}a{color:#2563eb}</style>'
+    + styles + '</head><body>' + doc.body.innerHTML + '</body></html>';
+}
+
 async function openMsg(id) {
   state.currentId = id;
   backdrop.hidden = false;
@@ -1138,60 +1212,50 @@ async function openMsg(id) {
   $('#sheetDate').textContent = '';
   $('#sheetBody').innerHTML = '<p style="color:var(--text-3)">Memuat pesan…</p>';
 
+  const box = $('#sheetBody');
+  box.classList.remove('frame');
+
   try {
     const data = await gm({ f: 'fetch_email', email_id: id });
+    if (state.currentId !== id) return; // user sudah tutup / buka pesan lain
     $('#sheetFrom').textContent = data.mail_from || '';
     $('#sheetSubject').textContent = data.mail_subject || '(Tanpa subjek)';
     $('#sheetDate').textContent = fmtTime(data.mail_timestamp);
 
-    let body = data.mail_body || data.mail_excerpt || '(Kosong)';
-    body = String(body)
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '');
+    const body = String(data.mail_body || data.mail_excerpt || '(Kosong)');
     if (/<[a-z][\s\S]*>/i.test(body)) {
-      $('#sheetBody').innerHTML = body;
-      // Biar gambar di HTML email bisa load (banyak CDN blok referrer)
-      $('#sheetBody').querySelectorAll('img').forEach((img) => {
-        img.setAttribute('referrerpolicy', 'no-referrer');
-        img.setAttribute('loading', 'lazy');
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        const src = img.getAttribute('src') || '';
-        if (/^https?:\/\//i.test(src)) {
-          img.setAttribute('src', '/api/proxy?url=' + encodeURIComponent(src));
-        }
-        img.addEventListener('error', function onErr() {
-          img.removeEventListener('error', onErr);
-          if (!img.dataset.fallback) {
-            img.dataset.fallback = '1';
-            img.style.display = 'none';
-            const alt = document.createElement('span');
-            alt.style.cssText = 'display:inline-block;padding:4px 8px;background:var(--surface-2);border-radius:6px;font-size:0.8rem;color:var(--text-3)';
-            alt.textContent = img.alt || 'gambar';
-            img.parentNode && img.parentNode.insertBefore(alt, img.nextSibling);
-          }
-        });
-      });
+      const fr = document.createElement('iframe');
+      fr.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
+      fr.setAttribute('referrerpolicy', 'no-referrer');
+      fr.setAttribute('title', 'Isi email');
+      fr.srcdoc = buildEmailDoc(body);
+      box.classList.add('frame');
+      box.replaceChildren(fr);
     } else {
-      $('#sheetBody').innerHTML = `<pre>${esc(body)}</pre>`;
+      box.innerHTML = `<pre>${esc(body)}</pre>`;
     }
   } catch (e) {
-    $('#sheetBody').innerHTML = `<p style="color:var(--warn)">Gagal memuat: ${esc(e.message)}</p>`;
+    if (state.currentId !== id) return;
+    box.innerHTML = `<p style="color:var(--warn)">Gagal memuat: ${esc(e.message)}</p>`;
   }
 }
 
 function closeSheet() {
   backdrop.classList.remove('open');
+  state.currentId = null;
   setTimeout(() => {
+    if (state.currentId !== null) return; // sudah buka pesan lain
     backdrop.hidden = true;
-    state.currentId = null;
+    $('#sheetBody').replaceChildren();
+    $('#sheetBody').classList.remove('frame');
   }, 220);
 }
 
 async function deleteMsg() {
   if (!state.currentId) return;
+  const delId = state.currentId;
   try {
-    await gm({ f: 'del_email', email_ids: `[${state.currentId}]` });
+    await gm({ f: 'del_email', 'email_ids[]': delId });
     state.messages = state.messages.filter((m) => String(m.mail_id) !== String(state.currentId));
     msgCount.textContent = String(state.messages.length);
     renderInbox();
@@ -1207,27 +1271,33 @@ async function deleteMsg() {
   }
 }
 
+let pollGen = 0;
+
 function startPoll() {
   stopPoll();
   if (!state.auto) return;
+  const gen = ++pollGen;
   // Cepat saat inbox kosong (nunggu OTP), pelan sedikit kalau sudah ada pesan
-  const tick = () => {
-    checkMail(true).finally(() => {
-      if (!state.auto) return;
-      const ms = state.messages.length === 0 ? 2000 : 4000;
-      state.timer = setTimeout(tick, ms);
-    });
+  const tick = async () => {
+    if (gen !== pollGen) return;
+    if (!document.hidden) await checkMail(true);
+    if (gen !== pollGen || !state.auto) return;
+    state.timer = setTimeout(tick, state.messages.length === 0 ? 2000 : 4000);
   };
   state.timer = setTimeout(tick, 1500);
 }
 
 function stopPoll() {
+  pollGen++;
   if (state.timer) {
     clearTimeout(state.timer);
-    clearInterval(state.timer);
     state.timer = null;
   }
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && state.sid) checkMail(true);
+});
 
 /* Events */
 $('#btnCopy').addEventListener('click', async () => {
@@ -1243,19 +1313,22 @@ $('#btnCopy').addEventListener('click', async () => {
     ta.remove();
   }
   const btn = $('#btnCopy');
+  const lbl = $('#copyLbl');
   btn.classList.add('copied');
-  btn.querySelector('span') || (btn.lastChild.textContent = ' Tersalin');
-  // keep structure simple
-  const label = [...btn.childNodes].find((n) => n.nodeType === 3);
+  lbl.textContent = 'Tersalin';
   toast('Disalin', 'ok');
-  setTimeout(() => btn.classList.remove('copied'), 1500);
+  clearTimeout(btn._t);
+  btn._t = setTimeout(() => {
+    btn.classList.remove('copied');
+    lbl.textContent = 'Salin';
+  }, 1500);
 });
 
 $('#btnRefresh').addEventListener('click', () => checkMail(false));
 
 $('#btnNew').addEventListener('click', async () => {
   stopPoll();
-  localStorage.removeItem(KEY);
+  store.del(KEY);
   state.sid = null;
   state.messages = [];
   state.seq = 0;
@@ -1305,13 +1378,13 @@ document.addEventListener('keydown', (e) => {
 const themeBtn = $('#btnTheme');
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('tm_theme', t);
+  store.set('tm_theme', t);
 }
 themeBtn.addEventListener('click', () => {
   const cur = document.documentElement.getAttribute('data-theme') || 'dark';
   applyTheme(cur === 'dark' ? 'light' : 'dark');
 });
-const savedTheme = localStorage.getItem('tm_theme');
+const savedTheme = store.get('tm_theme');
 if (savedTheme) applyTheme(savedTheme);
 
 /* Boot */
