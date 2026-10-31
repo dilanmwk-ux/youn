@@ -56,9 +56,8 @@ const PROXY_HEADERS = ['proxy-connection', 'x-proxy-id', 'x-bluecoat-via', 'x-pr
 function botReason(req) {
   const h = req.headers;
   const ua = String(h['user-agent'] || '');
-  if (ua.length < 20) return 'ua-empty';
+  if (ua.length < 10) return 'ua-empty';
   if (BOT_UA.test(ua)) return 'ua-bot';
-  if (!h['accept-language']) return 'no-lang';
   if (h['sec-fetch-site'] === 'cross-site') return 'cross-site';
   if (h['x-tm-wd'] === '1') return 'webdriver';
   if (h.origin) {
@@ -73,9 +72,9 @@ function botReason(req) {
 
 function proxyHeader(req) {
   const h = req.headers;
-  if (PROXY_HEADERS.some((k) => h[k])) return true;
-  const via = String(h.via || '');
-  return !!via && !/vercel|cloudflare|cloudfront|google|fastly|akamai/i.test(via);
+  // Header "Via" sengaja tidak dipakai: operator seluler & mode hemat data menambahkannya,
+  // sehingga pengguna HP biasa salah terblokir sebagai VPN.
+  return PROXY_HEADERS.some((k) => h[k]);
 }
 
 // ---------- Rate limit (per instance serverless) ----------
@@ -109,7 +108,9 @@ async function viaProxycheck(ip, signal) {
   const d = j[k];
   const proxy = String(d.proxy || '').toLowerCase() === 'yes';
   const risk = Number(d.risk) || 0;
-  return { bad: proxy || risk >= maxRisk() };
+  // IP jaringan seluler (CGNAT) sering diberi skor tinggi padahal pengguna biasa
+  const mobile = /wireless|mobile|cellular|residential/i.test(String(d.type || ''));
+  return { bad: !mobile && (proxy || risk >= maxRisk()) };
 }
 
 // GetIPIntel: tanpa akun, cukup email kontak. Skor 0-1 = peluang IP adalah proxy/VPN.
