@@ -52,7 +52,7 @@ module.exports = async function handler(req, res) {
 
   const st = stats.get();
   return res.status(200).json({
-    since: st.since, counters: { ...st.c, ...((await kv.counters()) || {}) }, persistent: kv.on(),
+    since: st.since, counters: { ...st.c, ...((await kv.counters()) || {}) }, persistent: kv.on(), kv: await kv.status(),
     keys: (await kv.get('keys')) || [], revoked: (await kv.get('revoked')) || [], articles: (await kv.get('articles')) || [], events: st.ev, upstream: up,
     config: {
       captcha: !!process.env.TURNSTILE_SECRET_KEY,
