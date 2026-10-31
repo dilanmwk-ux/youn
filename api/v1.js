@@ -38,9 +38,9 @@ module.exports = async function handler(req, res) {
     const key = mk(name), inf = verify(key);
     const list = (await kv.get('keys')) || [];
     list.unshift({ i: inf.i, n: name, t: inf.t });
-    await kv.set('keys', list.slice(0, 200));
+    const saved = await kv.set('keys', list.slice(0, 200));
     await stats.add('apikey', name);
-    return res.status(200).json({ key, name });
+    return res.status(200).json({ key, name, saved });
   }
 
   const info = verify(req.headers['x-api-key']);
