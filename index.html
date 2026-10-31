@@ -1448,6 +1448,7 @@ html body .toggle-txt{color:var(--v-ink);font-weight:700}
       <p>Selesaikan captcha untuk membuka TempMail.</p>
       <div id="cfBox"></div>
       <p class="gate-err" id="gateErr"></p>
+      <button type="button" class="btn-ghost" id="gatePow" hidden>Verifikasi alternatif</button>
       <button type="button" class="btn-ghost" id="gateRetry" hidden>Coba lagi</button>
     </div>
   </div>
@@ -1749,94 +1750,128 @@ function setTok(t) {
 function loadTurnstile() {
   return new Promise((resolve, reject) => {
     if (window.turnstile) return resolve();
-    const sc = document.createElement('script');
     let tries = 0;
     const add = () => {
       const sc = document.createElement('script');
-      sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit' + (tries ? '&r=' + tries : '');
+      sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
       sc.async = true;
-      sc.onload = () => (window.turnstile ? resolve() : reject(new Error('Captcha tidak termuat.')));
-      sc.onerror = () => {
-        sc.remove();
+      sc.defer = true;
+      let to = setTimeout(() => { sc.remove(); retry(); }, 10000);
+      const retry = () => {
         if (++tries < 3) return setTimeout(add, 1200 * tries);
-        reject(new Error('Gagal memuat captcha. Cek koneksi/DNS lalu coba lagi.'));
+        reject(new Error('Gagal memuat captcha'));
       };
+      sc.onload = () => { clearTimeout(to); window.turnstile ? resolve() : retry(); };
+      sc.onerror = () => { clearTimeout(to); sc.remove(); retry(); };
       document.head.appendChild(sc);
     };
     add();
   });
 }
 
-async function solvePow() {
-  const r = await fetch('/api/verify?pow=1', { cache: 'no-store', credentials: 'omit' });
-  if (!r.ok) throw new Error('Verifikasi tidak tersedia, coba lagi');
-  const { ch, sig, bits } = await r.json();
-  if (!(window.crypto && crypto.subtle)) throw new Error('Browser tidak didukung, coba Chrome terbaru');
+const IN_APP = /FBAN|FBAV|FB_IAB|Instagram|Line\/|TikTok|musical_ly|Snapchat|MicroMessenger|; wv\)/i.test(navigator.userAgent);
+function captchaHint(code) {
+  code = String(code || '');
+  let h = 'Coba buka lewat Chrome/Safari, matikan VPN, Private DNS, AdBlock, atau mode hemat data.';
+  if (/^110[1-3]/.test(code)) h = 'Pengaturan captcha di server belum cocok (domain/site key). Hubungi pemilik web.';
+  else if (/^1106/.test(code)) h = 'Jam HP belum akurat. Aktifkan "Tanggal & waktu otomatis" lalu muat ulang.';
+  if (IN_APP) h = 'Kamu membuka lewat browser dalam aplikasi. Buka link ini di Chrome/Safari. ' + h;
+  return h;
+}
+
+async function solvePow(c, bits, onProg) {
+  if (!(window.crypto && crypto.subtle)) throw new Error('Browser tidak mendukung verifikasi alternatif');
   const enc = new TextEncoder();
-  const ok = (h) => {
-    let n = 0;
-    for (const b of h) { if (b === 0) { n += 8; continue; } n += Math.clz32(b) - 24; break; }
-    return n >= bits;
-  };
-  for (let base = 0; ; base += 256) {
-    const hs = await Promise.all(Array.from({ length: 256 }, (_, i) =>
-      crypto.subtle.digest('SHA-256', enc.encode(ch + ':' + (base + i))).then((d) => new Uint8Array(d))));
-    const hit = hs.findIndex(ok);
-    if (hit >= 0) {
-      const v = await fetch('/api/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pow: { ch, sig, n: base + hit } }),
-        credentials: 'omit',
-      });
-      const j = await v.json().catch(() => ({}));
-      if (v.status === 403 && j.error === 'blocked') { const e = new Error('blocked'); e.blocked = j.reason; throw e; }
-      if (!v.ok || !j.ok) throw new Error(j.error || 'Verifikasi gagal, coba lagi');
-      return j.token;
+  const BATCH = 256;
+  let n = 0;
+  for (;;) {
+    const jobs = [];
+    for (let i = 0; i < BATCH; i++) jobs.push(crypto.subtle.digest('SHA-256', enc.encode(c + ':' + (n + i))));
+    const out = await Promise.all(jobs);
+    for (let i = 0; i < BATCH; i++) {
+      const h = new Uint8Array(out[i]);
+      let left = bits, ok = true;
+      for (let k = 0; left > 0; k++) {
+        const m = left >= 8 ? 0xff : (0xff << (8 - left)) & 0xff;
+        if (h[k] & m) { ok = false; break; }
+        left -= 8;
+      }
+      if (ok) return String(n + i);
     }
+    n += BATCH;
+    if (onProg) onProg(n);
+    await new Promise((r) => setTimeout(r, 0));
   }
 }
 
-function showGate(siteKey) {
+function showGate(siteKey, fallback) {
   return new Promise((resolve) => {
     gateEl.hidden = false;
     gateErr.textContent = '';
-    $('#gateRetry').hidden = true;
-    let done = false, wid = null, errs = 0, usedPow = false;
+    const retryBtn = $('#gateRetry');
+    const powBtn = $('#gatePow');
+    retryBtn.hidden = true;
+    powBtn.hidden = true;
+    let wid = null, errs = 0, powBusy = false, finished = false;
+
+    const finish = (tok) => {
+      if (finished) return;
+      finished = true;
+      setTok(tok);
+      gateEl.hidden = true;
+      resolve();
+    };
     const fail = (msg) => {
       gateErr.textContent = msg;
-      $('#gateRetry').hidden = false;
+      retryBtn.hidden = false;
+      if (fallback) powBtn.hidden = false;
     };
-    const finish = (tok) => { done = true; setTok(tok); gateEl.hidden = true; resolve(); };
 
-    // Jalur cadangan: dipakai jika Turnstile error / tidak termuat / tidak merespons
-    const fallback = async () => {
-      if (done || usedPow) return;
-      usedPow = true;
+    const runPow = async () => {
+      if (powBusy || finished) return;
+      powBusy = true;
+      powBtn.hidden = true;
+      retryBtn.hidden = true;
       try { if (wid !== null) window.turnstile.remove(wid); } catch {}
       $('#cfBox').replaceChildren();
-      gateErr.style.color = 'inherit';
       gateErr.textContent = 'Memverifikasi perangkat…';
       try {
-        finish(await solvePow());
+        const cr = await fetch('/api/verify?pow=1', { cache: 'no-store', credentials: 'omit' });
+        if (cr.status === 403) { const j = await cr.json().catch(() => ({})); if (j.error === 'blocked') { gateEl.hidden = true; return showBlock(j.reason); } }
+        if (!cr.ok) throw new Error('Verifikasi alternatif tidak tersedia');
+        const ch = await cr.json();
+        const n = await solvePow(ch.c, ch.bits, () => {});
+        const r = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pow: { c: ch.c, n } }),
+          credentials: 'omit',
+        });
+        const j = await r.json().catch(() => ({}));
+        if (r.status === 403 && j.error === 'blocked') { gateEl.hidden = true; return showBlock(j.reason); }
+        if (r.status === 429) throw new Error('Terlalu banyak percobaan, tunggu sebentar');
+        if (!r.ok || !j.ok) throw new Error(j.error || 'Verifikasi alternatif gagal');
+        finish(j.token);
       } catch (e) {
-        gateErr.style.color = '';
-        if (e.blocked) { gateEl.hidden = true; return showBlock(e.blocked); }
-        usedPow = false;
-        fail(e.message || 'Verifikasi gagal, coba lagi');
+        powBusy = false;
+        fail(e.message || 'Verifikasi gagal');
       }
     };
+    powBtn.onclick = runPow;
 
-    if (!siteKey) return fail('Captcha belum dikonfigurasi (TURNSTILE_SITE_KEY kosong).');
-    // Jika dalam 15 detik Turnstile belum selesai, pakai jalur cadangan
-    const wd = setTimeout(fallback, 15000);
+    if (!siteKey) {
+      if (fallback) return runPow();
+      return fail('Captcha belum dikonfigurasi (TURNSTILE_SITE_KEY kosong).');
+    }
+
     loadTurnstile().then(() => {
-      if (usedPow) return;
       $('#cfBox').replaceChildren();
       wid = window.turnstile.render('#cfBox', {
         sitekey: siteKey,
-        retry: 'never',
+        retry: 'auto',
+        'retry-interval': 3000,
         'refresh-expired': 'auto',
+        'refresh-timeout': 'auto',
         language: 'auto',
         theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
         callback: async (tk) => {
@@ -1851,23 +1886,29 @@ function showGate(siteKey) {
             if (r.status === 403 && j.error === 'blocked') { gateEl.hidden = true; return showBlock(j.reason); }
             if (r.status === 429) throw new Error('Terlalu banyak percobaan, tunggu sebentar');
             if (!r.ok || !j.ok) throw new Error(j.error || 'Verifikasi gagal, coba lagi');
-            clearTimeout(wd);
             finish(j.token);
           } catch (e) {
             gateErr.textContent = e.message;
             try { window.turnstile.reset(wid); } catch {}
           }
         },
-        'error-callback': () => {
-          // coba ulang sekali, jika masih error langsung pakai jalur cadangan
-          if (++errs >= 2) { clearTimeout(wd); fallback(); return true; }
-          setTimeout(() => { try { window.turnstile.reset(wid); } catch {} }, 800);
-          return true;
+        'error-callback': (code) => {
+          errs++;
+          gateErr.textContent = 'Captcha error' + (code ? ' (' + code + ')' : '') + '. ' + captchaHint(code);
+          retryBtn.hidden = false;
+          if (fallback) {
+            powBtn.hidden = false;
+            if (errs >= 2) runPow(); // otomatis pindah ke verifikasi alternatif
+          }
+          return true; // true = biarkan Turnstile mengulang otomatis
         },
         'timeout-callback': () => { try { window.turnstile.reset(wid); } catch {} },
         'expired-callback': () => { try { window.turnstile.reset(wid); } catch {} },
       });
-    }).catch(() => { clearTimeout(wd); fallback(); });
+    }).catch((e) => {
+      if (fallback) return runPow();
+      fail(e.message);
+    });
   });
 }
 
@@ -1878,7 +1919,7 @@ function ensureCaptcha(force = false) {
     const cfg = await fetchJson('/api/verify');
     if (!cfg.enabled) return; // captcha dimatikan di server
     store.del(TOKEN_KEY); memTok = null;
-    await showGate(cfg.siteKey);
+    await showGate(cfg.siteKey, !!cfg.fallback);
   })().finally(() => { gatePromise = null; });
   return gatePromise;
 }
