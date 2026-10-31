@@ -65,7 +65,7 @@ function sniffImage(b, declared) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-  if (!(await shield(req, res, { name: 'proxy', limit: 240 }))) return;
+  if (!(await shield(req, res, { name: 'proxy', limit: 600 }))) return;
   if (!auth.guard(req, res)) return;
 
   const raw = req.query.url;
