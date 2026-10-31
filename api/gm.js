@@ -17,13 +17,13 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-  if (!(await shield(req, res, { name: 'gm', limit: 90 }))) return;
+  if (!(await shield(req, res, { name: 'gm', limit: 240 }))) return;
   if (!auth.guard(req, res)) return;
 
   const f = String(req.query.f || '');
   if (!ALLOWED_FN.has(f)) return res.status(400).json({ error: 'Bad function' });
 
-  stats.add('gm:' + f);
+  await stats.add('gm:' + f);
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(req.query)) {
     if (!ALLOWED_PARAMS.has(k)) continue;
