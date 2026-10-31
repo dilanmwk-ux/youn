@@ -36,4 +36,9 @@ function guard(req, res) {
   return false;
 }
 
-module.exports = { enabled, issue, valid, guard };
+// HMAC generik (dipakai challenge proof-of-work di api/verify.js)
+function mac(str) {
+  return crypto.createHmac('sha256', secret()).update(String(str)).digest('base64url');
+}
+
+module.exports = { enabled, issue, valid, guard, mac };
