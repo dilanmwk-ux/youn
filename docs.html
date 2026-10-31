@@ -13,10 +13,85 @@
 <tr><td><code class="m">GET ?a=inbox</code></td><td>sid, seq</td><td>Daftar email baru sejak seq</td></tr>
 <tr><td><code class="m">GET ?a=read</code></td><td>sid, id</td><td>Isi email lengkap</td></tr>
 <tr><td><code class="m">GET ?a=del</code></td><td>sid, id</td><td>Hapus email</td></tr></table>
-<p>Basis: <code>/api/v1</code></p>
+<p>Basis: <code>/api/v1</code>. Semua respons berformat JSON (<code>Content-Type: application/json</code>).</p>
+<h2>Contoh respons JSON</h2>
+<p>Isi respons diteruskan apa adanya dari penyedia email (Guerrilla Mail), jadi nilainya berbeda tiap permintaan dan bisa ada field tambahan. Nilai di bawah hanya contoh.</p>
+<h3 style="margin:22px 0 4px;font:700 14px var(--m)">POST ?a=key — buat API key</h3><pre>{
+  "key": "tm_eyJpIjoiYTFiMmMzZDQiLCJuIjoiYXBwIiwidCI6MTc2MTkwMDAwMDAwMH0.Xk3m9QwP2LrT8vYbN1aZcg",
+  "name": "app",
+  "saved": true
+}</pre><p style="font-size:14px">Simpan key sekarang. <code>saved: false</code> artinya key tetap berfungsi, tapi belum tercatat di admin karena Redis belum tersambung.</p>
+<h3 style="margin:22px 0 4px;font:700 14px var(--m)">GET ?a=new — alamat baru</h3><pre>{
+  "email_addr": "x7k2m9qa@guerrillamailblock.com",
+  "email_timestamp": 1761900000,
+  "alias": "x7k2m9qa",
+  "site": "guerrillamail.com",
+  "site_id": 10,
+  "sid_token": "k2m9q7x8a1b3c4d5e6f7g8h9i0",
+  "auth": { "success": true, "error_codes": [] }
+}</pre><p style="font-size:14px">Simpan <code>sid_token</code>; dipakai di semua aksi berikutnya.</p>
+<h3 style="margin:22px 0 4px;font:700 14px var(--m)">GET ?a=set&amp;sid=SID&amp;user=budi — ganti nama pengguna</h3><pre>{
+  "email_addr": "budi@guerrillamailblock.com",
+  "email_timestamp": 1761900120,
+  "alias": "budi",
+  "site": "guerrillamail.com",
+  "site_id": 10,
+  "sid_token": "k2m9q7x8a1b3c4d5e6f7g8h9i0",
+  "auth": { "success": true, "error_codes": [] }
+}</pre>
+<h3 style="margin:22px 0 4px;font:700 14px var(--m)">GET ?a=inbox&amp;sid=SID&amp;seq=0 — daftar email</h3><pre>{
+  "list": [
+    {
+      "mail_id": "412345678",
+      "mail_from": "no-reply@contoh.com",
+      "mail_subject": "Kode verifikasi kamu: 482913",
+      "mail_excerpt": "Gunakan kode ini untuk masuk. Berlaku 10 menit…",
+      "mail_timestamp": "1761900300",
+      "mail_read": "0",
+      "mail_date": "09:05:00",
+      "att": "0",
+      "mail_size": "2841"
+    }
+  ],
+  "count": "1",
+  "email": "budi@guerrillamailblock.com",
+  "alias": "budi",
+  "ts": 1761900120,
+  "sid_token": "k2m9q7x8a1b3c4d5e6f7g8h9i0",
+  "auth": { "success": true, "error_codes": [] }
+}</pre><p style="font-size:14px">Panggilan pertama biasanya berisi email sambutan dari penyedia. Untuk polling berikutnya, isi <code>seq</code> dengan <code>mail_id</code> terbesar yang sudah kamu terima. Kalau belum ada email baru, <code>list</code> kosong atau hanya berisi email sambutan.</p>
+<h3 style="margin:22px 0 4px;font:700 14px var(--m)">GET ?a=read&amp;sid=SID&amp;id=412345678 — isi email lengkap</h3><pre>{
+  "mail_id": "412345678",
+  "mail_from": "no-reply@contoh.com",
+  "mail_recipient": "budi@guerrillamailblock.com",
+  "mail_subject": "Kode verifikasi kamu: 482913",
+  "mail_excerpt": "Gunakan kode ini untuk masuk. Berlaku 10 menit…",
+  "mail_body": "&lt;p&gt;Gunakan kode &lt;b&gt;482913&lt;/b&gt; untuk masuk.&lt;/p&gt;",
+  "mail_timestamp": "1761900300",
+  "mail_date": "09:05:00",
+  "mail_read": "1",
+  "content_type": "html",
+  "att": "0",
+  "mail_size": "2841",
+  "sid_token": "k2m9q7x8a1b3c4d5e6f7g8h9i0",
+  "auth": { "success": true, "error_codes": [] }
+}</pre><p style="font-size:14px"><code>mail_body</code> berisi HTML mentah dari pengirim. Bersihkan dulu sebelum ditampilkan di aplikasimu.</p>
+<h3 style="margin:22px 0 4px;font:700 14px var(--m)">GET ?a=del&amp;sid=SID&amp;id=412345678 — hapus email</h3><pre>{
+  "auth": { "success": true, "error_codes": [] },
+  "deleted_ids": ["412345678"]
+}</pre>
+<h2 id="galat">Respons galat</h2><p>Setiap galat berbentuk <code>{ "error": "pesan" }</code> dengan kode status HTTP yang sesuai.</p><table><tr><th>Status</th><th>Respons JSON</th><th>Penyebab</th></tr>
+<tr><td>400</td><td><code>{ "error": "a harus salah satu dari: new, set, inbox, read, del" }</code></td><td>Parameter <code>a</code> salah atau kosong</td></tr>
+<tr><td>401</td><td><code>{ "error": "API key tidak valid" }</code></td><td>Header <code>x-api-key</code> kosong atau salah</td></tr>
+<tr><td>401</td><td><code>{ "error": "API key sudah dicabut" }</code></td><td>Key dicabut lewat admin</td></tr>
+<tr><td>405</td><td><code>{ "error": "Gunakan POST" }</code></td><td>Membuat key harus dengan POST</td></tr>
+<tr><td>429</td><td><code>{ "error": "Batas 60 permintaan/menit" }</code></td><td>Melewati batas per key</td></tr>
+<tr><td>429</td><td><code>{ "error": "Maksimal 5 kunci per jam" }</code></td><td>Terlalu sering membuat key</td></tr>
+<tr><td>502</td><td><code>{ "error": "Upstream gagal" }</code></td><td>Penyedia email tidak merespons</td></tr>
+<tr><td>503</td><td><code>{ "error": "API_SECRET belum diisi di server" }</code></td><td>Server belum dikonfigurasi</td></tr>
+</table>
 <h2>Contoh</h2><pre id="ex"></pre>
 <h2>Live stream</h2><p>Aplikasi web memakai Server-Sent Events: <code>/api/stream?sid=…&amp;seq=…</code> mengirim event <code>mail</code> begitu email masuk, tanpa polling dari browser.</p>
-<h2>Kode galat</h2><table><tr><td>401</td><td>Kunci kosong atau salah</td></tr><tr><td>429</td><td>Melewati batas</td></tr><tr><td>502</td><td>Penyedia email tidak merespons</td></tr><tr><td>503</td><td>API_SECRET belum diisi server</td></tr></table>
 </div><script>
 const o=location.origin;
 document.getElementById('ex').textContent='curl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=new"\n\ncurl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=inbox&sid=SID&seq=0"';
