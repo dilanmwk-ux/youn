@@ -1731,7 +1731,9 @@ const gateEl = $('#gate');
 const gateErr = $('#gateErr');
 let gatePromise = null;
 
+let memTok = null; // cadangan jika localStorage diblokir (mode privat / browser dalam aplikasi)
 function getTok() {
+  if (memTok && memTok.exp > Date.now()) return memTok.t;
   try {
     const o = JSON.parse(store.get(TOKEN_KEY) || 'null');
     if (o && o.exp > Date.now()) return o.t;
@@ -1740,6 +1742,7 @@ function getTok() {
 }
 
 function setTok(t) {
+  memTok = { t, exp: Date.now() + 11 * 3600 * 1000 };
   store.set(TOKEN_KEY, JSON.stringify({ t, exp: Date.now() + 11 * 3600 * 1000 }));
 }
 
@@ -1747,11 +1750,20 @@ function loadTurnstile() {
   return new Promise((resolve, reject) => {
     if (window.turnstile) return resolve();
     const sc = document.createElement('script');
-    sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    sc.async = true;
-    sc.onload = () => resolve();
-    sc.onerror = () => reject(new Error('Gagal memuat captcha. Cek koneksi lalu coba lagi.'));
-    document.head.appendChild(sc);
+    let tries = 0;
+    const add = () => {
+      const sc = document.createElement('script');
+      sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit' + (tries ? '&r=' + tries : '');
+      sc.async = true;
+      sc.onload = () => (window.turnstile ? resolve() : reject(new Error('Captcha tidak termuat.')));
+      sc.onerror = () => {
+        sc.remove();
+        if (++tries < 3) return setTimeout(add, 1200 * tries);
+        reject(new Error('Gagal memuat captcha. Cek koneksi/DNS lalu coba lagi.'));
+      };
+      document.head.appendChild(sc);
+    };
+    add();
   });
 }
 
@@ -1769,6 +1781,11 @@ function showGate(siteKey) {
       $('#cfBox').replaceChildren();
       const wid = window.turnstile.render('#cfBox', {
         sitekey: siteKey,
+        retry: 'auto',
+        'retry-interval': 3000,
+        'refresh-expired': 'auto',
+        'refresh-timeout': 'auto',
+        language: 'auto',
         theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
         callback: async (tk) => {
           try {
@@ -1790,7 +1807,12 @@ function showGate(siteKey) {
             try { window.turnstile.reset(wid); } catch {}
           }
         },
-        'error-callback': () => { gateErr.textContent = 'Captcha error, coba lagi'; },
+        'error-callback': (code) => {
+          gateErr.textContent = 'Captcha error' + (code ? ' (' + code + ')' : '') + ', mencoba lagi…';
+          $('#gateRetry').hidden = false;
+          return true; // true = biarkan Turnstile mengulang otomatis
+        },
+        'timeout-callback': () => { try { window.turnstile.reset(wid); } catch {} },
         'expired-callback': () => { try { window.turnstile.reset(wid); } catch {} },
       });
     }).catch((e) => fail(e.message));
@@ -1803,7 +1825,7 @@ function ensureCaptcha(force = false) {
   gatePromise = (async () => {
     const cfg = await fetchJson('/api/verify');
     if (!cfg.enabled) return; // captcha dimatikan di server
-    store.del(TOKEN_KEY);
+    store.del(TOKEN_KEY); memTok = null;
     await showGate(cfg.siteKey);
   })().finally(() => { gatePromise = null; });
   return gatePromise;
