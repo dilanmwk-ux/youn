@@ -1,6 +1,20 @@
 // Penyimpanan permanen via Upstash Redis / Vercel KV (REST). Tanpa env -> memori sementara.
-const U = () => (process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || '').trim().replace(/\/+$/, '');
-const T = () => (process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || '').trim();
+// Cari env Redis dengan nama apa pun: UPSTASH_REDIS_REST_*, KV_REST_API_*, atau prefix kustom (mis. STORAGE_REST_API_*)
+function pick() {
+  const e = process.env;
+  if ((e.UPSTASH_REDIS_REST_URL && e.UPSTASH_REDIS_REST_TOKEN) || (e.KV_REST_API_URL && e.KV_REST_API_TOKEN)) {
+    return { u: e.UPSTASH_REDIS_REST_URL || e.KV_REST_API_URL, t: e.UPSTASH_REDIS_REST_TOKEN || e.KV_REST_API_TOKEN };
+  }
+  for (const k of Object.keys(e)) {
+    const m = k.match(/^(.*)_REST_(?:API_)?URL$/);
+    if (!m) continue;
+    const tk = [m[1] + '_REST_API_TOKEN', m[1] + '_REST_TOKEN'].find((x) => e[x]);
+    if (tk && e[k]) return { u: e[k], t: e[tk] };
+  }
+  return { u: '', t: '' };
+}
+const U = () => pick().u.trim().replace(/\/+$/, '');
+const T = () => pick().t.trim();
 const mem = global.__kv || (global.__kv = new Map());
 const on = () => !!(U() && T());
 let lastErr = '';
