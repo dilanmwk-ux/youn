@@ -6,7 +6,7 @@ module.exports = async function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
   if (req.method === 'GET') {
-    if (!(await shield(req, res, { name: 'vcfg', limit: 30 }))) return;
+    if (!(await shield(req, res, { name: 'vcfg', limit: 120 }))) return;
     return res.status(200).json({
       enabled: auth.enabled(),
       siteKey: process.env.TURNSTILE_SITE_KEY || '',
@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!(await shield(req, res, { name: 'vpost', limit: 10 }))) return;
+  if (!(await shield(req, res, { name: 'vpost', limit: 40 }))) return;
   if (!auth.enabled()) return res.status(200).json({ ok: true, token: '' });
 
   let body = req.body;
