@@ -21,6 +21,6 @@
 const o=location.origin;
 document.getElementById('ex').textContent='curl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=new"\n\ncurl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=inbox&sid=SID&seq=0"';
 const ky=document.getElementById('ky'),ca=document.getElementById('ca');
-document.getElementById('mk').onclick=async()=>{try{const r=await fetch('/api/v1?a=key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('nm').value})});const j=await r.json();ky.style.display='block';ca.style.display=j.key?'flex':'none';ky.textContent=j.key||j.error}catch{ky.style.display='block';ky.textContent='Gagal terhubung'}};
+document.getElementById('mk').onclick=async()=>{try{const r=await fetch('/api/v1?a=key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('nm').value})});const j=await r.json();ky.style.display='block';ca.style.display=j.key?'flex':'none';ky.textContent=(j.key||j.error)+(j.key&&!j.saved?'\n\n(Catatan: kunci berfungsi, tapi belum tercatat di admin karena penyimpanan Redis belum tersambung)':'')}catch{ky.style.display='block';ky.textContent='Gagal terhubung'}};
 document.getElementById('cp').onclick=e=>{navigator.clipboard.writeText(ky.textContent).then(()=>e.target.textContent='Tersalin')};
 </script></body></html>
