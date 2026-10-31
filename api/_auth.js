@@ -26,6 +26,43 @@ function valid(tok) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+// ---------- Verifikasi cadangan (proof-of-work) ----------
+// Dipakai jika Cloudflare Turnstile gagal di perangkat tertentu. Matikan dengan CAPTCHA_FALLBACK=0
+const fallbackOn = () => process.env.CAPTCHA_FALLBACK !== '0';
+const POW_BITS = 16;
+const POW_TTL = 2 * 60 * 1000;
+const usedPow = new Map();
+
+function powIssue() {
+  const exp = Date.now() + POW_TTL;
+  const rnd = crypto.randomBytes(8).toString('hex');
+  const body = exp + '.' + rnd;
+  const sig = crypto.createHmac('sha256', secret()).update('pow.' + body).digest('base64url');
+  return { c: body + '.' + sig, bits: POW_BITS };
+}
+
+function powCheck(c, n) {
+  if (typeof c !== 'string' || typeof n !== 'string' || c.length > 120 || n.length > 20) return false;
+  const [e, rnd, sig] = c.split('.');
+  const exp = Number(e);
+  if (!exp || exp < Date.now() || !rnd || !sig) return false;
+  const want = crypto.createHmac('sha256', secret()).update('pow.' + e + '.' + rnd).digest('base64url');
+  const a = Buffer.from(sig);
+  const b = Buffer.from(want);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
+  if (usedPow.has(rnd)) return false;
+  const h = crypto.createHash('sha256').update(c + ':' + n).digest();
+  let bits = POW_BITS;
+  for (let i = 0; bits > 0; i++) {
+    const m = bits >= 8 ? 0xff : (0xff << (8 - bits)) & 0xff;
+    if (h[i] & m) return false;
+    bits -= 8;
+  }
+  if (usedPow.size > 2000) for (const [k, v] of usedPow) if (v < Date.now()) usedPow.delete(k);
+  usedPow.set(rnd, exp);
+  return true;
+}
+
 // Dipakai di api/gm.js dan api/proxy.js
 function guard(req, res) {
   if (!enabled()) return true;
@@ -36,9 +73,4 @@ function guard(req, res) {
   return false;
 }
 
-// HMAC generik (dipakai challenge proof-of-work di api/verify.js)
-function mac(str) {
-  return crypto.createHmac('sha256', secret()).update(String(str)).digest('base64url');
-}
-
-module.exports = { enabled, issue, valid, guard, mac };
+module.exports = { enabled, issue, valid, guard, fallbackOn, powIssue, powCheck };
