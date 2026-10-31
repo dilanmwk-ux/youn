@@ -4,7 +4,7 @@ const stats = require('./_stats');
 
 // Live stream (SSE): server memeriksa Guerrilla Mail tiap ~2 dtk dan langsung mendorong email baru ke browser.
 module.exports = async function handler(req, res) {
-  if (!(await shield(req, res, { name: 'sse', limit: 30 }))) return;
+  if (!(await shield(req, res, { name: 'sse', limit: 60 }))) return;
   if (!auth.guard(req, res)) return;
   const sid = String(req.query.sid || '').slice(0, 120);
   let seq = Number(req.query.seq) || 0;
@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
     'X-Accel-Buffering': 'no',
   });
   res.write('retry: 1500\n\n');
-  stats.add('stream');
+  await stats.add('stream');
   let closed = false;
   req.on('close', () => { closed = true; });
   const ip = getIp(req) || '127.0.0.1';
