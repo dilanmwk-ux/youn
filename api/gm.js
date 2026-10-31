@@ -1,5 +1,6 @@
 const auth = require('./_auth');
 const { shield } = require('./_shield');
+const stats = require('./_stats');
 
 const ALLOWED_FN = new Set([
   'get_email_address', 'set_email_user', 'check_email',
@@ -22,6 +23,7 @@ module.exports = async function handler(req, res) {
   const f = String(req.query.f || '');
   if (!ALLOWED_FN.has(f)) return res.status(400).json({ error: 'Bad function' });
 
+  stats.add('gm:' + f);
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(req.query)) {
     if (!ALLOWED_PARAMS.has(k)) continue;
