@@ -35,11 +35,11 @@ module.exports = async function handler(req, res) {
     let b = req.body;
     if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }
     const name = String((b && b.name) || 'app').replace(/[^\w .-]/g, '').slice(0, 24) || 'app';
-    stats.add('apikey', name);
     const key = mk(name), inf = verify(key);
     const list = (await kv.get('keys')) || [];
     list.unshift({ i: inf.i, n: name, t: inf.t });
     await kv.set('keys', list.slice(0, 200));
+    await stats.add('apikey', name);
     return res.status(200).json({ key, name });
   }
 
@@ -53,7 +53,7 @@ module.exports = async function handler(req, res) {
   const q = new URLSearchParams({ f, ip: '127.0.0.1', agent: 'TempMail-API/1.0' });
   const map = { sid: 'sid_token', user: 'email_user', seq: 'seq', id: a === 'del' ? 'email_ids[]' : 'email_id' };
   for (const [k, v] of Object.entries(map)) if (typeof req.query[k] === 'string') q.set(v, req.query[k].slice(0, 200));
-  stats.add('v1:' + a, info.n);
+  await stats.add('v1:' + a, info.n);
   try {
     const up = await fetch('https://api.guerrillamail.com/ajax.php?' + q, { signal: AbortSignal.timeout(10000) });
     return res.status(up.ok ? 200 : up.status).json(await up.json());
