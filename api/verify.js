@@ -1,5 +1,22 @@
+const crypto = require('crypto');
 const auth = require('./_auth');
-const { shield } = require('./_shield');
+const { shield, getIp } = require('./_shield');
+
+// Jalur cadangan jika Turnstile gagal di HP pengunjung (proof-of-work, tanpa Cloudflare)
+const POW_BITS = 17;
+const POW_TTL = 3 * 60 * 1000;
+const fp = (req) => crypto.createHash('sha256')
+  .update(getIp(req) + '|' + String(req.headers['user-agent'] || '')).digest('base64url').slice(0, 16);
+
+function leadingZeroBits(buf) {
+  let n = 0;
+  for (const b of buf) {
+    if (b === 0) { n += 8; continue; }
+    n += Math.clz32(b) - 24;
+    break;
+  }
+  return n;
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -7,6 +24,10 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'GET') {
     if (!(await shield(req, res, { name: 'vcfg', limit: 120 }))) return;
+    if (req.query && req.query.pow && auth.enabled()) {
+      const ch = Date.now() + '.' + crypto.randomBytes(8).toString('hex') + '.' + fp(req);
+      return res.status(200).json({ ch, sig: auth.mac('pow.' + ch), bits: POW_BITS });
+    }
     return res.status(200).json({
       enabled: auth.enabled(),
       siteKey: process.env.TURNSTILE_SITE_KEY || '',
@@ -21,6 +42,21 @@ module.exports = async function handler(req, res) {
   if (typeof body === 'string') {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
+  if (body && body.pow) {
+    const { ch, sig, n } = body.pow;
+    if (typeof ch !== 'string' || typeof sig !== 'string' || ch.length > 120 || !/^\d{1,10}$/.test(String(n))) {
+      return res.status(400).json({ ok: false, error: 'Verifikasi tidak valid' });
+    }
+    const a = Buffer.from(sig), b = Buffer.from(auth.mac('pow.' + ch));
+    const parts = ch.split('.');
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b) || parts[2] !== fp(req) || Date.now() - Number(parts[0]) > POW_TTL) {
+      return res.status(403).json({ ok: false, error: 'Verifikasi kedaluwarsa, coba lagi' });
+    }
+    const h = crypto.createHash('sha256').update(ch + ':' + n).digest();
+    if (leadingZeroBits(h) < POW_BITS) return res.status(403).json({ ok: false, error: 'Verifikasi gagal, coba lagi' });
+    return res.status(200).json({ ok: true, token: auth.issue() });
+  }
+
   const token = body && body.token;
   if (typeof token !== 'string' || !token || token.length > 4096) {
     return res.status(400).json({ ok: false, error: 'Token captcha kosong' });
