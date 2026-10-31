@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>TempMail API — dokumentasi</title><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/ui.css"><style>.fl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:700 12px var(--m)}.fl span{border:1.5px solid var(--line);border-radius:var(--r);padding:6px 10px;background:var(--card)}.m{color:var(--ok)}</style></head><body><div class="wrap"><nav class="nv"><a class="lg" href="/"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/><circle cx="26" cy="8" r="4" fill="#e8431f" stroke="none"/></svg>TempMail</a><a class="l on" href="/docs">API</a><a class="l " href="/blog">Artikel</a><a class="l " href="/admin">Admin</a></nav>
+<div class="tg">REST · JSON · tanpa SDK</div><h1>API TempMail,<br>dengan kunci milikmu sendiri.</h1>
+<p>Buat kotak masuk sementara dari skrip, bot, atau tes otomatis. Kunci dibuat di sini, tanpa daftar akun.</p>
+<div class="cd" style="margin-top:28px"><b>Buat API key</b>
+<div class="row" style="margin-top:12px"><input id="nm" placeholder="nama aplikasi (opsional)" maxlength="24" style="flex:1;min-width:180px"><button class="bt" id="mk">Buat kunci</button></div>
+<pre id="ky" style="display:none"></pre><div class="row" id="ca" style="display:none;margin-top:10px"><button class="bt g" id="cp">Salin</button><span style="font-size:13px;color:var(--mut)">Simpan sekarang. Kunci tidak ditampilkan ulang.</span></div></div>
+<h2>Alur</h2>
+<svg viewBox="0 0 640 70" width="100%" role="img" aria-label="Alur: buat alamat, kirim email, ambil inbox, baca"><g fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="14" width="130" height="42" rx="6"/><rect x="170" y="14" width="130" height="42" rx="6"/><rect x="340" y="14" width="130" height="42" rx="6"/><rect x="508" y="14" width="130" height="42" rx="6"/><path d="M134 35h34M302 35h36M472 35h34M162 29l6 6-6 6M332 29l6 6-6 6M500 29l6 6-6 6"/></g><g font-family="JetBrains Mono" font-size="13" font-weight="700" fill="currentColor" text-anchor="middle"><text x="67" y="40">a=new</text><text x="235" y="40">kirim email</text><text x="405" y="40">a=inbox</text><text x="573" y="40">a=read</text></g></svg>
+<h2>Autentikasi</h2><p>Kirim header <code>x-api-key</code> di setiap permintaan. Batas 60 permintaan per menit per kunci.</p>
+<h2>Endpoint</h2><table><tr><th>Aksi</th><th>Parameter</th><th>Fungsi</th></tr>
+<tr><td><code class="m">GET ?a=new</code></td><td>—</td><td>Alamat baru + <code>sid_token</code></td></tr>
+<tr><td><code class="m">GET ?a=set</code></td><td>sid, user</td><td>Ganti nama pengguna alamat</td></tr>
+<tr><td><code class="m">GET ?a=inbox</code></td><td>sid, seq</td><td>Daftar email baru sejak seq</td></tr>
+<tr><td><code class="m">GET ?a=read</code></td><td>sid, id</td><td>Isi email lengkap</td></tr>
+<tr><td><code class="m">GET ?a=del</code></td><td>sid, id</td><td>Hapus email</td></tr></table>
+<p>Basis: <code>/api/v1</code></p>
+<h2>Contoh</h2><pre id="ex"></pre>
+<h2>Live stream</h2><p>Aplikasi web memakai Server-Sent Events: <code>/api/stream?sid=…&amp;seq=…</code> mengirim event <code>mail</code> begitu email masuk, tanpa polling dari browser.</p>
+<h2>Kode galat</h2><table><tr><td>401</td><td>Kunci kosong atau salah</td></tr><tr><td>429</td><td>Melewati batas</td></tr><tr><td>502</td><td>Penyedia email tidak merespons</td></tr><tr><td>503</td><td>API_SECRET belum diisi server</td></tr></table>
+</div><script>
+const o=location.origin;
+document.getElementById('ex').textContent='curl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=new"\n\ncurl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=inbox&sid=SID&seq=0"';
+const ky=document.getElementById('ky'),ca=document.getElementById('ca');
+document.getElementById('mk').onclick=async()=>{try{const r=await fetch('/api/v1?a=key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('nm').value})});const j=await r.json();ky.style.display='block';ca.style.display=j.key?'flex':'none';ky.textContent=j.key||j.error}catch{ky.style.display='block';ky.textContent='Gagal terhubung'}};
+document.getElementById('cp').onclick=e=>{navigator.clipboard.writeText(ky.textContent).then(()=>e.target.textContent='Tersalin')};
+</script></body></html>
