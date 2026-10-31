@@ -1,22 +1,5 @@
-const crypto = require('crypto');
 const auth = require('./_auth');
-const { shield, getIp } = require('./_shield');
-
-// Jalur cadangan jika Turnstile gagal di HP pengunjung (proof-of-work, tanpa Cloudflare)
-const POW_BITS = 17;
-const POW_TTL = 3 * 60 * 1000;
-const fp = (req) => crypto.createHash('sha256')
-  .update(getIp(req) + '|' + String(req.headers['user-agent'] || '')).digest('base64url').slice(0, 16);
-
-function leadingZeroBits(buf) {
-  let n = 0;
-  for (const b of buf) {
-    if (b === 0) { n += 8; continue; }
-    n += Math.clz32(b) - 24;
-    break;
-  }
-  return n;
-}
+const { shield } = require('./_shield');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -24,13 +7,14 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'GET') {
     if (!(await shield(req, res, { name: 'vcfg', limit: 120 }))) return;
-    if (req.query && req.query.pow && auth.enabled()) {
-      const ch = Date.now() + '.' + crypto.randomBytes(8).toString('hex') + '.' + fp(req);
-      return res.status(200).json({ ch, sig: auth.mac('pow.' + ch), bits: POW_BITS });
+    if (req.query && req.query.pow) {
+      if (!auth.enabled() || !auth.fallbackOn()) return res.status(404).json({ error: 'off' });
+      return res.status(200).json(auth.powIssue());
     }
     return res.status(200).json({
       enabled: auth.enabled(),
       siteKey: process.env.TURNSTILE_SITE_KEY || '',
+      fallback: auth.enabled() && auth.fallbackOn(),
     });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -43,20 +27,10 @@ module.exports = async function handler(req, res) {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
   if (body && body.pow) {
-    const { ch, sig, n } = body.pow;
-    if (typeof ch !== 'string' || typeof sig !== 'string' || ch.length > 120 || !/^\d{1,10}$/.test(String(n))) {
-      return res.status(400).json({ ok: false, error: 'Verifikasi tidak valid' });
-    }
-    const a = Buffer.from(sig), b = Buffer.from(auth.mac('pow.' + ch));
-    const parts = ch.split('.');
-    if (a.length !== b.length || !crypto.timingSafeEqual(a, b) || parts[2] !== fp(req) || Date.now() - Number(parts[0]) > POW_TTL) {
-      return res.status(403).json({ ok: false, error: 'Verifikasi kedaluwarsa, coba lagi' });
-    }
-    const h = crypto.createHash('sha256').update(ch + ':' + n).digest();
-    if (leadingZeroBits(h) < POW_BITS) return res.status(403).json({ ok: false, error: 'Verifikasi gagal, coba lagi' });
+    if (!auth.fallbackOn()) return res.status(403).json({ ok: false, error: 'Verifikasi alternatif dimatikan' });
+    if (!auth.powCheck(body.pow.c, String(body.pow.n))) return res.status(403).json({ ok: false, error: 'Verifikasi alternatif gagal, coba lagi' });
     return res.status(200).json({ ok: true, token: auth.issue() });
   }
-
   const token = body && body.token;
   if (typeof token !== 'string' || !token || token.length > 4096) {
     return res.status(400).json({ ok: false, error: 'Token captcha kosong' });
@@ -73,7 +47,11 @@ module.exports = async function handler(req, res) {
       signal: ctrl.signal,
     });
     const j = await r.json();
-    if (!j.success) return res.status(403).json({ ok: false, error: 'Verifikasi gagal, coba lagi' });
+    if (!j.success) {
+      const codes = Array.isArray(j['error-codes']) ? j['error-codes'].slice(0, 4) : [];
+      console.error('turnstile siteverify gagal:', codes.join(','));
+      return res.status(403).json({ ok: false, error: 'Verifikasi gagal' + (codes.length ? ' (' + codes[0] + ')' : '') + ', coba lagi', codes });
+    }
     return res.status(200).json({ ok: true, token: auth.issue() });
   } catch {
     return res.status(502).json({ ok: false, error: 'Server captcha tidak merespons' });
