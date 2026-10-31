@@ -8,7 +8,7 @@
   <title>TempMail</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@500&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
   <style>
 :root {
   --bg: #07070b;
@@ -1187,6 +1187,41 @@ a.contact-link:active {
   max-width: 320px;
 }
 </style>
+<style id="v2">
+html{--v-bg:#12110d;--v-ink:#efeadc;--v-card:#1b1a14;--v-mut:#9a9482;--v-acc:#ff6a45}
+html[data-theme="light"]{--v-bg:#f3efe6;--v-ink:#17160f;--v-card:#fbf9f3;--v-mut:#6b675a;--v-acc:#e8431f}
+html body{background:var(--v-bg);color:var(--v-ink);font-family:'Bricolage Grotesque',system-ui,sans-serif}
+html body .noise{display:none}
+html body .shell{max-width:640px}
+html body .top{border-bottom:1.5px solid var(--v-ink);padding-bottom:12px;margin-bottom:18px}
+html body .brand-name{font-weight:800;font-size:19px;letter-spacing:-.02em}
+html body .brand-mark{color:var(--v-acc)}
+html body .icon-btn{border:1.5px solid var(--v-ink);border-radius:6px;background:var(--v-card);color:var(--v-ink)}
+html body .panel{background:var(--v-card);border:1.5px solid var(--v-ink);border-radius:6px;box-shadow:4px 4px 0 var(--v-ink);margin-bottom:22px}
+html body .panel-label{font:700 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--v-acc)}
+html body .live-dot{background:var(--v-acc)}
+html body .address-box{background:var(--v-bg);border:1.5px dashed var(--v-ink);border-radius:6px}
+html body #emailAddress{font:700 clamp(15px,4.6vw,21px) 'JetBrains Mono',monospace;color:var(--v-ink);word-break:break-all}
+html body .act,html body .btn-solid,html body .btn-ghost{font:700 14px 'Bricolage Grotesque',sans-serif;border:1.5px solid var(--v-ink);border-radius:6px;background:var(--v-card);color:var(--v-ink);box-shadow:3px 3px 0 var(--v-ink);transition:transform .08s,box-shadow .08s}
+html body .btn-solid{background:var(--v-acc);color:#fff}
+html body .act:active,html body .btn-solid:active{transform:translate(3px,3px);box-shadow:none}
+html body .field{border:1.5px solid var(--v-ink);border-radius:6px;background:var(--v-bg)}
+html body .field input{font-family:'JetBrains Mono',monospace;color:var(--v-ink)}
+html body .inbox-head h2{font-weight:800;letter-spacing:-.01em}
+html body .count{background:var(--v-ink);color:var(--v-bg);border-radius:99px;font:700 12px 'JetBrains Mono',monospace}
+html body .msg{border-bottom:1.5px solid color-mix(in srgb,var(--v-ink) 22%,transparent);transition:background .12s,transform .12s}
+html body .msg:hover{background:color-mix(in srgb,var(--v-acc) 9%,transparent)}
+html body .msg-av{border:1.5px solid var(--v-ink);border-radius:50%}
+html body .msg-from{font-weight:800}
+html body .msg-ex,html body .msg-time,html body .foot p{color:var(--v-mut)}
+html body .msg.new{animation:nw .5s ease-out}
+@keyframes nw{from{background:color-mix(in srgb,var(--v-acc) 28%,transparent);transform:translateX(-8px)}}
+html body .empty svg{color:var(--v-acc)}
+html body .sheet{border:1.5px solid var(--v-ink);background:var(--v-card);color:var(--v-ink)}
+html body .sheet-subject{font-weight:800;letter-spacing:-.02em}
+html body .toast{border:1.5px solid var(--v-ink);border-radius:6px;box-shadow:3px 3px 0 var(--v-ink)}
+@media(prefers-reduced-motion:reduce){html body *{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
@@ -2001,6 +2036,7 @@ function renderInbox() {
   if (sig === inboxSig) return;
   inboxSig = sig;
 
+  window.__seen = window.__seen || null;
   inboxList.querySelectorAll('.msg').forEach((el) => el.remove());
 
   if (!state.messages.length) {
@@ -2012,7 +2048,7 @@ function renderInbox() {
   for (const m of state.messages) {
     const from = m.mail_from || 'Unknown';
     const el = document.createElement('div');
-    el.className = 'msg';
+    el.className = 'msg' + (window.__seen && !window.__seen.has(String(m.mail_id)) ? ' new' : '');
     el.dataset.id = m.mail_id;
     el.innerHTML = `
       <div class="msg-av">${esc(initial(from))}</div>
@@ -2029,6 +2065,7 @@ function renderInbox() {
     el.addEventListener('click', () => openMsg(m.mail_id));
     inboxList.appendChild(el);
   }
+  window.__seen = new Set(state.messages.map((x) => String(x.mail_id)));
 }
 
 const BLOCKED_TAGS = 'script,iframe,frame,frameset,object,embed,applet,form,input,button,select,textarea,link,meta,base,audio,video,source,track,math,noscript,template,portal,foreignObject,use,animate,set,animateTransform';
@@ -2389,6 +2426,33 @@ applyLang();
   }
 })();
 
+</script>
+<style>.nvl{display:flex;gap:4px}.nvl a{font:600 13px/1 inherit;padding:8px 10px;border-radius:99px;text-decoration:none;color:inherit;opacity:.8}.nvl a:hover{opacity:1;background:rgba(127,127,127,.18)}#liveB{display:inline-flex;align-items:center;gap:6px;font:700 11px/1 ui-monospace,monospace;letter-spacing:.08em;margin-left:8px}#liveB i{width:7px;height:7px;border-radius:50%;background:#888}#liveB.on i{background:#e8431f;animation:lv 1.4s infinite}@keyframes lv{50%{opacity:.25}}</style>
+<script>
+/* Navigasi + live stream (SSE). Memakai state/renderInbox dari skrip utama. */
+(function(){
+  var ta=document.querySelector('.top-actions');
+  if(ta){var n=document.createElement('div');n.className='nvl';n.innerHTML='<a href="/docs">API</a><a href="/blog">Artikel</a><a href="/admin">Admin</a>';ta.prepend(n)}
+  var h2=document.querySelector('.inbox-head h2');
+  var b=document.createElement('span');b.id='liveB';b.innerHTML='<i></i>LIVE';if(h2)h2.appendChild(b);
+  var es=null,cur=null;
+  function open(){
+    if(!state.sid||state.sid===cur)return;
+    cur=state.sid;if(es)es.close();
+    var t=getTok();
+    es=new EventSource('/api/stream?sid='+encodeURIComponent(state.sid)+'&seq='+state.seq+(t?'&t='+encodeURIComponent(t):''));
+    es.onopen=function(){b.classList.add('on')};
+    es.onerror=function(){b.classList.remove('on')};
+    es.addEventListener('mail',function(e){
+      var d=JSON.parse(e.data),map=new Map(state.messages.map(function(m){return[String(m.mail_id),m]}));
+      d.list.forEach(function(m){map.set(String(m.mail_id),m)});
+      state.messages=Array.from(map.values()).sort(function(a,c){return Number(c.mail_timestamp||0)-Number(a.mail_timestamp||0)});
+      if(d.seq)state.seq=d.seq;
+      save();msgCount.textContent=String(state.messages.length);inboxSig=null;renderInbox();
+    });
+  }
+  setInterval(function(){if(!state.sid&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},1000);
+})();
 </script>
 </body>
 </html>
