@@ -1,0 +1,76 @@
+/* TempMail — token & komponen bersama (dipakai semua halaman) */
+:root {
+  color-scheme: light;
+  --c-bg: #f3efe6;
+  --c-ink: #17160f;
+  --c-mut: #645f52;
+  --c-card: #fbf9f3;
+  --c-acc: #d63a14;
+  --c-on-acc: #ffffff;
+  --c-ok: #1f7a4d;
+  --r: 6px;
+  --w: 760px;
+  --f: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --m: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-bg: #12110d;
+  --c-ink: #efeadc;
+  --c-mut: #a29c89;
+  --c-card: #1b1a14;
+  --c-acc: #ff6a45;
+  --c-on-acc: #17160f;
+  --c-ok: #4ec98a;
+}
+
+body { padding-top: env(safe-area-inset-top); }
+
+/* Header seragam */
+.sh {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px;
+  padding: 16px 0 14px; margin-bottom: 28px;
+  border-bottom: 1.5px solid var(--c-ink);
+}
+.sh .lg {
+  display: flex; align-items: center; gap: 8px; margin-right: auto;
+  font: 800 19px var(--f); letter-spacing: -.02em;
+  color: var(--c-ink); text-decoration: none;
+}
+.nvl { display: flex; gap: 2px; }
+.nvl a {
+  padding: 7px 12px; border-radius: 99px;
+  font: 600 14px var(--f); color: var(--c-ink); text-decoration: none; opacity: .8;
+}
+.nvl a:hover, .nvl a[aria-current="page"] { background: var(--c-ink); color: var(--c-bg); opacity: 1; }
+.sh-act { display: flex; gap: 8px; }
+.sh .ib {
+  width: 38px; height: 38px; padding: 0; display: grid; place-items: center; cursor: pointer;
+  border: 1.5px solid var(--c-ink); border-radius: var(--r);
+  background: var(--c-card); color: var(--c-ink);
+  box-shadow: 2px 2px 0 var(--c-ink); backdrop-filter: none;
+  transition: transform .08s, box-shadow .08s;
+}
+.sh .ib:hover { transform: none; background: var(--c-card); border-color: var(--c-ink); }
+.sh .ib:active { transform: translate(2px, 2px); box-shadow: none; }
+.i-moon { display: none; }
+[data-theme="light"] .i-sun { display: none; }
+[data-theme="light"] .i-moon { display: block; }
+
+/* Footer seragam */
+.sf {
+  margin-top: 56px; padding-top: 16px;
+  border-top: 1.5px dashed color-mix(in srgb, var(--c-ink) 35%, transparent);
+  text-align: center; font: 500 13px var(--f); color: var(--c-mut);
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--c-acc); outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .nvl { order: 3; width: 100%; margin-left: -12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
