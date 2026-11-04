@@ -1121,7 +1121,7 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
   .cta-band{padding:24px}
 }
 </style>
-</head>
+<link rel="stylesheet" href="/polish.css"></head>
 <body>
   <div class="shell" id="top">
     <header class="site-head"><div class="container sh">
@@ -2329,7 +2329,7 @@ function buildEmailDoc(html, mode) {
     + '<meta name="viewport" content="width=device-width, initial-scale=1">'
     + '<base target="_blank">'
     + '<style>html{background:#fff}body{margin:0;padding:14px 16px;color:#111;font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img{max-width:100%!important;height:auto!important}table{max-width:100%!important}a{color:#2563eb}</style>'
-    + styles + '</head><body>' + doc.body.innerHTML + '</body></html>';
+    + styles + '<link rel="stylesheet" href="/polish.css"></head><body>' + doc.body.innerHTML + '</body></html>';
   return { html: out, imgs: ctr.n };
 }
 
