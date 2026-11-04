@@ -8,7 +8,7 @@
 <div id="ed" class="stack mt" hidden><input id="et" placeholder="Judul" aria-label="Judul"><input id="es" placeholder="slug-url" aria-label="Slug"><input id="ed2" placeholder="waktu baca, mis. 4 mnt baca" aria-label="Waktu baca"><textarea id="eb" rows="9" placeholder="Paragraf dipisah baris kosong. Awali dengan ## untuk subjudul."></textarea><div class="row"><button class="bt" id="sv">Simpan</button><button class="bt g" id="dl">Hapus</button></div></div>
 <p class="sm">Kalau daftar kosong, halaman artikel memakai 3 artikel bawaan.</p></div>
 <h2>Konfigurasi</h2><div class="cd" id="cf"></div>
-<h2>Kejadian terbaru</h2><div class="cd ev" id="ev"></div></div></main><footer class="sf">Email sementara · pesan disimpan singkat · jangan untuk data penting</footer></div><script>
+<h2>Kejadian terbaru</h2><div class="cd ev" id="ev"></div></div></main></div><script>
 const $=s=>document.querySelector(s);let AL=[],ei=-1,tk=sessionStorage.tm_adm||'',tm;
 const E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 async function load(){try{const r=await fetch('/api/admin',{headers:{Authorization:'Bearer '+tk}});if(r.status===401||r.status===503){const j=await r.json();out(j.error);return}draw(await r.json())}catch{}}
