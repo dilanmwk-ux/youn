@@ -137,3 +137,69 @@ th{background:color-mix(in srgb,var(--c-ink) 4%,var(--c-card));font-family:var(-
   #inbox .inbox-body{max-height:440px}
 }
 @media(prefers-reduced-motion:reduce){#inbox .msg{animation:none;transition:none}}
+
+
+/* Responsive layout refinement: phone, tablet, laptop and desktop */
+html{width:100%;overflow-x:hidden;scroll-behavior:smooth}
+body{min-width:320px;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+button,a,input,textarea,select{touch-action:manipulation}
+button,a{ -webkit-tap-highlight-color:transparent }
+:focus-visible{outline:3px solid color-mix(in srgb,var(--c-acc) 65%,transparent);outline-offset:3px}
+.wrap,.shell{width:100%;margin-inline:auto}
+.sh{display:flex;align-items:center;gap:16px;min-width:0}
+.sh .lg{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px}
+.nvl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.sh-act{margin-left:auto;display:flex;align-items:center;gap:8px}
+.cd,.panel,.fc,.inbox-panel{min-width:0}
+input,textarea,select{max-width:100%;min-width:0}
+pre{max-width:100%;overflow:auto;white-space:pre}
+table{display:block;max-width:100%;overflow-x:auto}
+@media(min-width:1200px){
+  .wrap,.shell,.site-head .sh{max-width:1180px}
+}
+@media(max-width:760px){
+  .wrap,.shell{padding-left:16px;padding-right:16px}
+  .sh{gap:10px;flex-wrap:wrap}
+  .sh .lg{margin-right:auto}
+  .nvl{order:3;width:100%;gap:4px}
+  .nvl a{padding:7px 9px}
+  .sh-act{margin-left:0}
+  .hero{grid-template-columns:minmax(0,1fr);gap:26px}
+  .hero h1{font-size:clamp(34px,9vw,48px);max-width:100%;overflow-wrap:anywhere}
+  .lead{font-size:15px}
+  .panel{padding:16px}
+  .sec{padding-top:48px}
+  .sec h2{font-size:clamp(25px,6vw,32px)}
+  .docs-key{max-width:100%}
+  .row .grow{min-width:min(100%,180px)}
+}
+@media(max-width:520px){
+  .wrap,.shell{padding-left:13px;padding-right:13px}
+  .site-head .sh{padding:11px 13px}
+  .nvl{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px;scrollbar-width:thin}
+  .nvl a{white-space:nowrap}
+  .hero{padding-top:32px;padding-bottom:34px}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:9px}
+  .hero-cta .hb{min-width:0;flex:1 1 140px}
+  .chips{flex-wrap:wrap}
+  .cd,.fc{padding:15px}
+  .address-box{overflow-wrap:anywhere}
+  #inbox .inbox-head{align-items:flex-start;flex-wrap:wrap}
+  #inbox .msg{min-width:0}
+  .row{min-width:0}
+  .row .grow{flex:1 1 100%;width:100%}
+  .bt{min-height:40px}
+}
+@media(max-width:360px){
+  .wrap,.shell{padding-left:10px;padding-right:10px}
+  h1{font-size:32px}
+  .nvl a{font-size:12px;padding:6px 7px}
+  .panel{padding:12px}
+}
+@media(hover:none){
+  .nvl a:hover,.act:hover:not(:disabled){transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+}
