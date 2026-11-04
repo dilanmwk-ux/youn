@@ -92,7 +92,7 @@
 </table></div>
 <h2>Contoh</h2><pre id="ex"></pre>
 <h2>Live stream</h2><p>Aplikasi web memakai Server-Sent Events: <code>/api/stream?sid=…&amp;seq=…</code> mengirim event <code>mail</code> begitu email masuk, tanpa polling dari browser.</p>
-</main><footer class="sf">Email sementara · pesan disimpan singkat · jangan untuk data penting</footer></div><script>
+</main></div><script>
 const o=location.origin;
 document.getElementById('ex').textContent='curl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=new"\n\ncurl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=inbox&sid=SID&seq=0"';
 const ky=document.getElementById('ky'),ca=document.getElementById('ca');
