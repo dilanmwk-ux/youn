@@ -1,28 +1,16 @@
-/* Tema bersama: dibaca sebelum render supaya tidak berkedip, dipakai semua halaman. */
+/* Tema mengikuti pengaturan perangkat (terang/gelap). Dipakai semua halaman. */
 (function () {
-  var d = document.documentElement, t = null;
-  try { t = localStorage.getItem('tm_theme'); } catch (e) {}
-  if (t !== 'light' && t !== 'dark') {
-    t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  d.setAttribute('data-theme', t);
+  var d = document.documentElement;
+  var mq = matchMedia('(prefers-color-scheme: dark)');
+  try { localStorage.removeItem('tm_theme'); } catch (e) {}
 
-  function syncMeta() {
+  function apply() {
+    d.setAttribute('data-theme', mq.matches ? 'dark' : 'light');
     var m = document.querySelector('meta[name="theme-color"]');
-    if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
-    m.content = d.getAttribute('data-theme') === 'dark' ? '#12110d' : '#f3efe6';
+    if (!m && document.head) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+    if (m) m.content = mq.matches ? '#0d1422' : '#f6f8fb';
   }
-  syncMeta();
-  new MutationObserver(syncMeta).observe(d, { attributes: true, attributeFilter: ['data-theme'] });
-
-  /* Tombol tema di halaman selain beranda (beranda punya handler sendiri) */
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest('[data-theme-toggle]')) return;
-    var n = d.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    d.setAttribute('data-theme', n);
-    try { localStorage.setItem('tm_theme', n); } catch (err) {}
-  });
-  addEventListener('storage', function (e) {
-    if (e.key === 'tm_theme' && (e.newValue === 'light' || e.newValue === 'dark')) d.setAttribute('data-theme', e.newValue);
-  });
+  apply();
+  if (mq.addEventListener) mq.addEventListener('change', apply);
+  else if (mq.addListener) mq.addListener(apply);
 })();
