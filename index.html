@@ -10,8 +10,7 @@
   <script src="/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/tokens.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
   <style>
 :root {
   --bg: #07070b;
@@ -982,151 +981,13 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
   max-width: 320px;
 }
 </style>
-<style id="theme-map">
-/* Semua variabel lama (indigo) dipetakan ke token bersama supaya seluruh komponen satu warna */
-html:root{
-  --bg:var(--c-bg);--bg-grad:none;
-  --surface:var(--c-card);--surface-solid:var(--c-card);
-  --surface-2:color-mix(in srgb,var(--c-ink) 6%,var(--c-card));
-  --surface-3:color-mix(in srgb,var(--c-ink) 12%,var(--c-card));
-  --border:color-mix(in srgb,var(--c-ink) 22%,transparent);
-  --border-hover:color-mix(in srgb,var(--c-ink) 45%,transparent);
-  --border-soft:color-mix(in srgb,var(--c-ink) 10%,transparent);
-  --text:var(--c-ink);--text-2:var(--c-mut);--text-3:var(--c-mut);
-  --accent:var(--c-acc);--accent-bright:var(--c-acc);
-  --accent-dim:color-mix(in srgb,var(--c-acc) 14%,transparent);--accent-glow:transparent;
-  --ok:var(--c-ok);--ok-dim:color-mix(in srgb,var(--c-ok) 15%,transparent);
-  --warn:var(--c-acc);--warn-dim:color-mix(in srgb,var(--c-acc) 12%,transparent);
-  --radius:var(--r);--radius-sm:var(--r);--radius-xs:4px;
-  --font:var(--f);--mono:var(--m);
-  --shadow:none;--shadow-lg:6px 6px 0 var(--c-ink);
-}
-body{background:var(--c-bg);color:var(--c-ink);font-family:var(--f)}
-.shell{max-width:var(--w);padding:0 20px 48px}
-.panel{background:var(--c-card);border:1.5px solid var(--c-ink);border-radius:var(--r);box-shadow:4px 4px 0 var(--c-ink);margin-bottom:22px;backdrop-filter:none}
-.panel-label{font:700 11px var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--c-acc)}
-.icon-btn{border:1.5px solid var(--c-ink);border-radius:var(--r);background:var(--c-card);color:var(--c-ink);box-shadow:2px 2px 0 var(--c-ink);backdrop-filter:none}
-.icon-btn:hover{background:var(--c-card);color:var(--c-ink);border-color:var(--c-ink);transform:none}
-.icon-btn:active{transform:translate(2px,2px);box-shadow:none}
-.live-dot{background:var(--c-acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--c-acc) 22%,transparent)}
-.address-box{background:var(--c-bg);border:1.5px dashed var(--c-ink);border-radius:var(--r)}
-#emailAddress{font:700 clamp(15px,4.6vw,21px) var(--m);color:var(--c-ink);word-break:break-all}
-.act,.btn-solid,.btn-ghost{font:700 14px var(--f);border:1.5px solid var(--c-ink);border-radius:var(--r);background:var(--c-card);color:var(--c-ink);box-shadow:3px 3px 0 var(--c-ink);transition:transform .08s,box-shadow .08s}
-.btn-solid{background:var(--c-acc);color:var(--c-on-acc)}
-.act:active,.btn-solid:active{transform:translate(3px,3px);box-shadow:none}
-.field{border:1.5px solid var(--c-ink);border-radius:var(--r);background:var(--c-bg)}
-.field input{font-family:var(--m);color:var(--c-ink)}
-.inbox-head h2{font-weight:800;letter-spacing:-.01em}
-.count{background:var(--c-ink);color:var(--c-bg);border-radius:99px;font:700 12px var(--m)}
-.msg{border-bottom:1.5px solid color-mix(in srgb,var(--c-ink) 22%,transparent);transition:background .12s,transform .12s}
-.msg:hover{background:color-mix(in srgb,var(--c-acc) 9%,transparent)}
-.msg-av{border:1.5px solid var(--c-ink);border-radius:50%}
-.msg-from{font-weight:800}
-.msg-ex,.msg-time,.foot p{color:var(--c-mut)}
-.msg.new{animation:nw .5s ease-out}
-@keyframes nw{from{background:color-mix(in srgb,var(--c-acc) 28%,transparent);transform:translateX(-8px)}}
-.empty svg{color:var(--c-acc)}
-.sheet-backdrop{background:color-mix(in srgb,var(--c-ink) 55%,transparent);backdrop-filter:none}
-.sheet{border:1.5px solid var(--c-ink);border-bottom:0;background:var(--c-bg);color:var(--c-ink);box-shadow:none}
-.sheet::before{content:"";width:38px;height:4px;border-radius:9px;background:color-mix(in srgb,var(--c-ink) 30%,transparent);margin:8px auto 0;flex-shrink:0}
-@media(min-width:480px){.sheet{border-bottom:1.5px solid var(--c-ink);box-shadow:6px 6px 0 var(--c-ink)}.sheet::before{display:none}}
-.sheet-subject{font-weight:800;letter-spacing:-.02em}
-.toast{border:1.5px solid var(--c-ink);border-radius:var(--r);box-shadow:3px 3px 0 var(--c-ink)}
-.toggle input:checked+.toggle-ui{background:var(--c-acc)}
-.toggle-txt{color:var(--c-ink);font-weight:700}
-.foot{text-align:center;margin-top:34px;padding-top:16px;border-top:1.5px dashed color-mix(in srgb,var(--c-ink) 35%,transparent)}
-.foot p{font:500 13px var(--f)}
-#liveB{display:inline-flex;align-items:center;gap:6px;margin-left:8px;font:700 11px/1 var(--m);letter-spacing:.08em}
-#liveB i{width:7px;height:7px;border-radius:50%;background:var(--c-mut)}
-#liveB.on i{background:var(--c-acc);animation:lv 1.4s infinite}
-@keyframes lv{50%{opacity:.25}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
 
-<style id="site-layout">
-.tg{font:700 11px var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--c-acc)}
-/* ===== Layout website (menimpa gaya kolom sempit ala aplikasi) ===== */
-html{scroll-behavior:smooth;scroll-padding-top:84px}
-.shell{max-width:none;padding:0;gap:0;display:block;min-height:0}
-.container{width:100%;max-width:1120px;margin:0 auto;padding:0 24px}
-.site-head{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--c-bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1.5px solid var(--c-ink);padding-top:env(safe-area-inset-top)}
-.site-head .sh{border-bottom:0;margin-bottom:0;padding:12px 24px;flex-wrap:nowrap;gap:8px}
-.site-head .nvl{margin-right:8px}
-.site-head .sh-act{margin-left:auto}
-.site-head .lg{margin-right:16px}
-.lg svg{flex:none}
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding-top:64px;padding-bottom:40px}
-.hero h1{font:800 clamp(36px,5.4vw,60px)/1.02 var(--f);letter-spacing:-.035em;margin:10px 0 0}
-.lead{font-size:18px;line-height:1.6;color:var(--c-mut);max-width:52ch;margin-top:18px}
-.chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:0;margin-top:22px}
-.chips li{font:700 12px var(--m);letter-spacing:.04em;padding:6px 12px;border:1.5px solid var(--c-ink);border-radius:99px;background:var(--c-card)}
-.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.hb{display:inline-block;font:700 15px var(--f);text-decoration:none;background:var(--c-acc);color:var(--c-on-acc);border:1.5px solid var(--c-ink);border-radius:var(--r);padding:12px 20px;box-shadow:3px 3px 0 var(--c-ink);transition:transform .08s,box-shadow .08s}
-.hb.g{background:var(--c-card);color:var(--c-ink)}
-.hb:active{transform:translate(3px,3px);box-shadow:none}
-.hero-tool .panel{margin-bottom:0}
-#inbox{padding-top:24px;scroll-margin-top:84px}
-#inbox .panel{margin-bottom:0;min-height:240px}
-.sec{padding-top:72px}
-.sec h2{font:800 clamp(28px,4vw,40px)/1.1 var(--f);letter-spacing:-.025em;margin:6px 0 0}
-.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:32px}
-.fc{background:var(--c-card);border:1.5px solid var(--c-ink);border-radius:var(--r);padding:22px;box-shadow:4px 4px 0 var(--c-ink)}
-.fi{width:44px;height:44px;display:grid;place-items:center;border:1.5px solid var(--c-ink);border-radius:var(--r);background:var(--c-bg);color:var(--c-acc)}
-.fc h3{font:800 18px var(--f);letter-spacing:-.01em;margin:16px 0 6px}
-.fc p{color:var(--c-mut);font-size:15px;line-height:1.6}
-.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:32px;counter-reset:s}
-.st{border-top:1.5px solid var(--c-ink);padding-top:18px}
-.sn{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--c-ink);color:var(--c-bg);font:800 15px var(--m)}
-.st h3{font:800 20px var(--f);margin:14px 0 6px}
-.st p{color:var(--c-mut);font-size:15px;line-height:1.6}
-.faq{margin-top:28px;max-width:780px}
-.fq{border:1.5px solid var(--c-ink);border-radius:var(--r);background:var(--c-card);margin-top:12px}
-.fq summary{cursor:pointer;list-style:none;padding:16px 18px;font:700 16px var(--f);display:flex;justify-content:space-between;gap:12px}
-.fq summary::-webkit-details-marker{display:none}
-.fq summary::after{content:"+";font:700 20px/1 var(--m);color:var(--c-acc)}
-.fq[open] summary::after{content:"\2212"}
-.fq p{padding:0 18px 16px;color:var(--c-mut);line-height:1.6}
-.cta-band{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:var(--c-ink);color:var(--c-bg);border-radius:var(--r);padding:32px}
-.cta-band h2{font:800 28px var(--f);margin:0;color:var(--c-bg)}
-.cta-band p{color:color-mix(in srgb,var(--c-bg) 75%,transparent);margin-top:6px;max-width:52ch}
-.cta-band .hb{box-shadow:3px 3px 0 var(--c-bg);border-color:var(--c-bg)}
-.site-foot{margin-top:80px;border-top:1.5px solid var(--c-ink);padding:40px 0 28px}
-.sf-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px}
-.site-foot .lg{display:inline-flex;align-items:center;gap:8px;font:800 19px var(--f);letter-spacing:-.02em;color:var(--c-ink);text-decoration:none}
-.sf-d{color:var(--c-mut);margin-top:10px;font-size:14px}
-.site-foot h4{font:700 11px var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--c-acc);margin-bottom:10px}
-.site-foot nav a{display:block;color:var(--c-ink);text-decoration:none;font:600 14px var(--f);padding:4px 0;opacity:.85}
-.site-foot nav a:hover{opacity:1;text-decoration:underline}
-.site-foot .foot{margin-top:32px}
-/* Modal tampil di tengah (bukan bottom sheet) */
-.sheet-backdrop{align-items:center;padding:16px}
-.sheet{max-width:520px;border-bottom:1.5px solid var(--c-ink);border-radius:var(--r);box-shadow:6px 6px 0 var(--c-ink);transform:translateY(14px) scale(.98);max-height:90dvh}
-.sheet::before{display:none}
-.sheet-backdrop.open .sheet{transform:none}
-#sheetBackdrop .sheet{max-width:780px}
-/* Responsif */
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr;gap:32px;padding-top:40px}
-  .fgrid,.steps{grid-template-columns:1fr 1fr}
-  .sf-grid{grid-template-columns:1fr 1fr}
-  .sf-grid>div:first-child{grid-column:1/-1}
-}
-@media(max-width:720px){
-  .site-head .sh{flex-wrap:wrap;padding:10px 16px}
-  .site-head .nvl{order:3;width:100%;overflow-x:auto;margin:0 -4px;padding-bottom:2px;scrollbar-width:none}
-  .site-head .nvl a{white-space:nowrap}
-  .container{padding:0 16px}
-  .fgrid,.steps{grid-template-columns:1fr}
-  .sec{padding-top:52px}
-  .cta-band{padding:24px}
-}
-</style>
-<link rel="stylesheet" href="/polish.css"></head>
+<link rel="stylesheet" href="/site.css"></head>
 <body>
   <div class="shell" id="top">
     <header class="site-head"><div class="container sh">
       <a class="lg" href="/"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/><circle cx="26" cy="8" r="4" style="fill:var(--c-acc)" stroke="none"/></svg>TempMail</a>
-      <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#cara" data-i18n="navHow">Cara kerja</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a><a href="/blog" data-i18n="navBlog">Artikel</a></nav>
+      <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#cara" data-i18n="navHow">Cara kerja</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
       <div class="sh-act">
         <button type="button" class="icon-btn ib" id="btnTheme" aria-label="Ganti tema" data-i18n-aria="theme">
           <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18">
@@ -1279,8 +1140,6 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
           <nav aria-label="Developer">
             <h4>Developer</h4>
             <a href="/docs">API</a>
-            <a href="/blog" data-i18n="navBlog">Artikel</a>
-            <a href="/admin">Admin</a>
           </nav>
         </div>
       </div>
@@ -1342,6 +1201,17 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
               <span class="flag" aria-hidden="true"><svg viewBox="0 0 60 30" width="36" height="18" xmlns="http://www.w3.org/2000/svg"><clipPath id="ukS"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="ukT"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#ukS)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#ukT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg></span>
               <span>English</span>
             </button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-label" data-i18n="account">Akun</div>
+          <div class="set-list">
+            <a class="settings-row contact-link" href="/login">
+              <div class="contact-icon acct" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+              </div>
+              <div class="settings-row-text"><div class="settings-row-title" data-i18n="login">Login</div></div>
+            </a>
           </div>
         </div>
         <div class="settings-section">
@@ -1439,7 +1309,8 @@ const I18N = {
     navFeatures: 'Fitur',
     navHow: 'Cara kerja',
     navFaq: 'FAQ',
-    navBlog: 'Artikel',
+    account: 'Akun',
+    login: 'Login',
     heroTag: 'Email sementara · gratis',
     heroTitle: 'Inbox sekali pakai, tanpa ribet.',
     heroDesc: 'Dapatkan alamat email sementara untuk mendaftar, mengunduh, atau mencoba layanan, tanpa membuka email utamamu ke spam.',
@@ -1535,7 +1406,8 @@ const I18N = {
     navFeatures: 'Features',
     navHow: 'How it works',
     navFaq: 'FAQ',
-    navBlog: 'Articles',
+    account: 'Account',
+    login: 'Login',
     heroTag: 'Temporary email · free',
     heroTitle: 'A disposable inbox, zero hassle.',
     heroDesc: 'Get a temporary email address to sign up, download, or try a service without exposing your real inbox to spam.',
@@ -2327,7 +2199,7 @@ function buildEmailDoc(html, mode) {
     + '<meta name="viewport" content="width=device-width, initial-scale=1">'
     + '<base target="_blank">'
     + '<style>html{background:#fff}body{margin:0;padding:14px 16px;color:#111;font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img{max-width:100%!important;height:auto!important}table{max-width:100%!important}a{color:#2563eb}</style>'
-    + styles + '<link rel="stylesheet" href="/polish.css"></head><body>' + doc.body.innerHTML + '</body></html>';
+    + styles + '</head><body>' + doc.body.innerHTML + '</body></html>';
   return { html: out, imgs: ctr.n };
 }
 
@@ -2570,6 +2442,7 @@ function closeSettings() {
 }
 
 $('#btnSettings').addEventListener('click', openSettings);
+if (location.hash === '#pengaturan') { history.replaceState(null, '', location.pathname); openSettings(); }
 $('#btnCloseSettings').addEventListener('click', closeSettings);
 settingsBackdrop.addEventListener('click', (e) => {
   if (e.target === settingsBackdrop) closeSettings();
