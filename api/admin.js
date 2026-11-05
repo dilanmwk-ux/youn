@@ -32,14 +32,6 @@ module.exports = async function handler(req, res) {
       await kv.set('revoked', rv.slice(-500));
       return res.status(200).json({ ok: true });
     }
-    if (req.query.r === 'articles' && b && Array.isArray(b.list)) {
-      const list = b.list.slice(0, 50).map((x) => ({
-        s: String(x.s || '').toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 60),
-        t: String(x.t || '').slice(0, 140), d: String(x.d || '').slice(0, 30), b: String(x.b || '').slice(0, 20000),
-      })).filter((x) => x.s && x.t);
-      await kv.set('articles', list);
-      return res.status(200).json({ ok: true, n: list.length });
-    }
     return res.status(400).json({ error: 'Permintaan tidak dikenal' });
   }
 
@@ -53,7 +45,7 @@ module.exports = async function handler(req, res) {
   const st = stats.get();
   return res.status(200).json({
     since: st.since, counters: { ...st.c, ...((await kv.counters()) || {}) }, persistent: kv.on(), kv: await kv.status(),
-    keys: (await kv.get('keys')) || [], revoked: (await kv.get('revoked')) || [], articles: (await kv.get('articles')) || [], events: st.ev, upstream: up,
+    keys: (await kv.get('keys')) || [], revoked: (await kv.get('revoked')) || [], events: st.ev, upstream: up,
     config: {
       captcha: !!process.env.TURNSTILE_SECRET_KEY,
       shield: process.env.SHIELD_ENABLED !== '0',
