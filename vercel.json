@@ -40,5 +40,22 @@
     "api/stream.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/api/articles",
+      "destination": "/",
+      "permanent": false
+    }
+  ]
 }
