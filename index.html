@@ -132,9 +132,6 @@ body {
 
 .icon-btn:active { transform: translateY(0); }
 
-.i-moon { display: none; }
-[data-theme="light"] .i-sun { display: none; }
-[data-theme="light"] .i-moon { display: block; }
 
 /* Panels */
 .panel {
@@ -850,7 +847,7 @@ body {
 
 /* Settings */
 .set-bar {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: flex-end;
   padding: 18px 18px 12px; flex-shrink: 0;
 }
 .set-bar h3 { font: 800 22px var(--f); letter-spacing: -0.02em; }
@@ -876,9 +873,7 @@ body {
   transition: background 0.12s, color 0.12s;
 }
 .seg button:hover { color: var(--c-ink); }
-.seg button.active,
-[data-theme="light"] .seg [data-set-theme="light"],
-[data-theme="dark"] .seg [data-set-theme="dark"] { background: var(--c-ink); color: var(--c-bg); }
+.seg button.active { background: var(--c-ink); color: var(--c-bg); }
 .lang-opt .flag { display: flex; width: 22px; height: 15px; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
 .lang-opt .flag svg { width: 100%; height: 100%; }
 
@@ -989,18 +984,9 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
       <a class="lg" href="/"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/><circle cx="26" cy="8" r="4" style="fill:var(--c-acc)" stroke="none"/></svg>TempMail</a>
       <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#cara" data-i18n="navHow">Cara kerja</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
       <div class="sh-act">
-        <button type="button" class="icon-btn ib" id="btnTheme" aria-label="Ganti tema" data-i18n-aria="theme">
-          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18">
-            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-          </svg>
-          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18">
-            <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/>
-          </svg>
-        </button>
         <button type="button" class="icon-btn ib" id="btnSettings" aria-label="Pengaturan" data-i18n-aria="settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </button>
       </div>
@@ -1173,9 +1159,8 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
   </div>
 
   <div class="sheet-backdrop" id="settingsBackdrop" hidden>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Pengaturan" data-i18n-aria="settings">
       <div class="sheet-bar set-bar">
-        <h3 id="settingsTitle" data-i18n="settings">Pengaturan</h3>
         <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup" data-i18n-aria="close">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18">
             <path d="M6 6l12 12M18 6L6 18"/>
@@ -1183,13 +1168,6 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
         </button>
       </div>
       <div class="settings-body">
-        <div class="settings-section">
-          <div class="settings-label" data-i18n="theme">Tema</div>
-          <div class="seg">
-            <button type="button" data-set-theme="light" aria-label="Terang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-            <button type="button" data-set-theme="dark" aria-label="Gelap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/></svg></button>
-          </div>
-        </div>
         <div class="settings-section">
           <div class="settings-label" data-i18n="language">Bahasa</div>
           <div class="lang-opts seg">
@@ -1331,8 +1309,8 @@ const I18N = {
     f4_d: 'Isi email dibuka dalam bingkai ter-sandbox, jadi skrip dari pengirim tidak dijalankan.',
     f5_t: 'API untuk developer',
     f5_d: 'REST + JSON dengan API key. Cocok untuk skrip, bot, dan tes otomatis.',
-    f6_t: 'Terang & gelap, ID & EN',
-    f6_d: 'Tema dan bahasa bisa diganti kapan saja dan diingat di perangkatmu.',
+    f6_t: 'Dua bahasa, ID & EN',
+    f6_d: 'Bahasa bisa diganti kapan saja dan diingat di perangkatmu.',
     howTag: 'Cara kerja',
     howTitle: 'Tiga langkah, selesai',
     s1_t: 'Salin alamatmu',
@@ -1375,7 +1353,6 @@ const I18N = {
     location: 'Indonesia',
     hobby: 'Hobi: memancing',
     emailLabel: 'Email',
-    theme: 'Ganti tema',
     close: 'Tutup',
     noSubject: '(Tanpa subjek)',
     justNow: 'baru',
@@ -1428,8 +1405,8 @@ const I18N = {
     f4_d: 'Email bodies open in a sandboxed frame, so scripts from the sender are not executed.',
     f5_t: 'API for developers',
     f5_d: 'REST + JSON with an API key. Great for scripts, bots, and automated tests.',
-    f6_t: 'Light & dark, ID & EN',
-    f6_d: 'Switch theme and language any time; your choice is remembered on your device.',
+    f6_t: 'Two languages, ID & EN',
+    f6_d: 'Switch language any time; your choice is remembered on your device.',
     howTag: 'How it works',
     howTitle: 'Three steps, done',
     s1_t: 'Copy your address',
@@ -1473,7 +1450,6 @@ const I18N = {
     location: 'Indonesia',
     hobby: 'Hobby: fishing',
     emailLabel: 'Email',
-    theme: 'Toggle theme',
     close: 'Close',
     noSubject: '(No subject)',
     justNow: 'now',
@@ -2411,22 +2387,6 @@ $('#btnDeleteMsg').addEventListener('click', deleteMsg);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && backdrop.classList.contains('open')) closeSheet();
 });
-
-/* Theme */
-const themeBtn = $('#btnTheme');
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  store.set('tm_theme', t);
-}
-themeBtn.addEventListener('click', () => {
-  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-  applyTheme(cur === 'dark' ? 'light' : 'dark');
-});
-document.querySelectorAll('[data-set-theme]').forEach((b) => {
-  b.addEventListener('click', () => applyTheme(b.dataset.setTheme));
-});
-const savedTheme = store.get('tm_theme');
-if (savedTheme) applyTheme(savedTheme);
 
 /* Settings */
 function openSettings() {
