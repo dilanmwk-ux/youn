@@ -2174,7 +2174,7 @@ function buildEmailDoc(html, mode) {
     + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src ' + imgSrc + '; style-src \'unsafe-inline\'">'
     + '<meta name="viewport" content="width=device-width, initial-scale=1">'
     + '<base target="_blank">'
-    + '<style>html{background:#fff}body{margin:0;padding:14px 16px;color:#111;font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img{max-width:100%!important;height:auto!important}table{max-width:100%!important}a{color:#2563eb}</style>'
+    + '<style>html{background:#fff}body{margin:0;padding:14px 16px;color:#111;font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img{max-width:100%!important;height:auto!important}table{max-width:100%!important}a{color:#000;text-decoration:underline}</style>'
     + styles + '</head><body>' + doc.body.innerHTML + '</body></html>';
   return { html: out, imgs: ctr.n };
 }
@@ -2448,7 +2448,7 @@ applyLang();
 /* Live stream (SSE). Memakai state/renderInbox dari skrip utama. */
 (function(){
   var h2=document.querySelector('.inbox-head h2');
-  var b=document.createElement('span');b.id='liveB';b.innerHTML='<i></i>LIVE';if(h2)h2.appendChild(b);
+  var b=document.createElement('span');b.id='liveB';b.innerHTML='<i></i>Live';if(h2)h2.appendChild(b);
   var es=null,cur=null;
   function open(){
     if(!state.sid||state.sid===cur)return;
