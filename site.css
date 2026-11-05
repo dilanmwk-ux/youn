@@ -70,9 +70,6 @@ th{background:var(--c-soft);font:700 11px var(--m);text-transform:uppercase;lett
 .sh-act{display:flex;align-items:center;gap:8px}
 .icon-btn{width:38px;height:38px;padding:0;display:grid;place-items:center;flex:none;border:1px solid var(--c-line);border-radius:10px;background:var(--c-card);color:var(--c-ink);box-shadow:none;backdrop-filter:none;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
 .icon-btn:hover{background:var(--c-soft);color:var(--c-ink);border-color:color-mix(in srgb,var(--c-ink) 24%,transparent);transform:none}
-.i-moon{display:none}
-[data-theme=light] .i-sun{display:none}
-[data-theme=light] .i-moon{display:block}
 .site-head{position:sticky;top:0;z-index:40;padding-top:env(safe-area-inset-top);background:color-mix(in srgb,var(--c-bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--c-line)}
 .site-head .sh{padding:12px 24px}
 
@@ -160,7 +157,7 @@ th{background:var(--c-soft);font:700 11px var(--m);text-transform:uppercase;lett
 .settings-label{font:700 11px var(--f);letter-spacing:.07em;color:var(--c-mut)}
 .seg{border:1px solid var(--c-line);border-radius:11px;background:var(--c-soft)}
 .seg button{border-radius:8px;color:var(--c-mut);font:600 14px var(--f)}
-.seg button.active,[data-theme=light] .seg [data-set-theme=light],[data-theme=dark] .seg [data-set-theme=dark]{background:var(--c-card);color:var(--c-acc);box-shadow:0 1px 3px rgba(20,35,60,.15)}
+.seg button.active{background:var(--c-card);color:var(--c-acc);box-shadow:0 1px 3px rgba(20,35,60,.15)}
 .dev-profile,.set-list{background:var(--c-card);border:1px solid var(--c-line);border-radius:12px}
 .dev-avatar{border:1px solid var(--c-line)}
 a.contact-link+a.contact-link{border-top:1px solid var(--c-line)}
@@ -190,7 +187,8 @@ a.contact-link:hover,a.contact-link:active{background:var(--c-soft)}
  .sec{padding-top:56px}
  .panel{padding:16px}
  .inbox-head,.msg{padding-left:15px;padding-right:15px}
- .msg-row{flex-direction:column;align-items:flex-start;gap:2px}
+ .msg-row{flex-direction:column;align-items:stretch;gap:2px;min-width:0}
+ .msg-from{min-width:0;max-width:100%}
  .cta-band{padding:24px}
  .hero-cta .hb{flex:1 1 140px}
  .row .grow{flex:1 1 100%}
