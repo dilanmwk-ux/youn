@@ -2,7 +2,7 @@
 <main><div id="lg"><div class="tg">Area pengelola</div><h1>Login</h1><div class="cd login stack"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password"><button class="bt" id="go">Masuk</button><p id="er" class="err" role="alert"></p></div></div>
 <div id="db" hidden><div class="row sb"><h1>Ringkasan</h1><button class="bt g" id="out">Keluar</button></div>
 <div class="grid mt" id="tl"></div>
-<h2>Aktivitas per jenis</h2><div class="cd"><svg id="ch" width="100%" role="img" aria-label="Grafik aktivitas"></svg></div>
+<h2>Aktivitas per jenis</h2><div class="cd"><div id="ch" class="bars" role="img" aria-label="Grafik aktivitas"></div></div>
 <h2>API key</h2><div class="cd" id="ks"></div>
 <h2>Konfigurasi</h2><div class="cd" id="cf"></div>
 <h2>Kejadian terbaru</h2><div class="cd ev" id="ev"></div></div></main></div><script>
@@ -14,15 +14,16 @@ function draw(d){$('#lg').hidden=true;$('#db').hidden=false;const c=d.counters,s
 const up=Math.round((Date.now()-d.since)/60000);
 $('#tl').innerHTML=[['Permintaan inbox',sum('gm:')],['Live stream',c.stream||0],['Panggilan API v1',sum('v1:')],['Kunci dibuat',Math.max(c.apikey||0,d.keys.length)],['Penyedia email',(d.upstream.ok?'OK ':'Down ')+d.upstream.ms+' ms'],['Instance aktif',up+' mnt']].map(([a,b])=>'<div class="cd"><div class="tg">'+a+'</div><div class="n">'+b+'</div></div>').join('');
 const rows=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,8),mx=Math.max(1,...rows.map(r=>r[1]));
-const ch=$('#ch');ch.setAttribute('viewBox','0 0 600 '+Math.max(40,rows.length*30));
-ch.innerHTML=rows.map((r,i)=>'<text x="0" y="'+(i*30+18)+'" font-family="JetBrains Mono" font-size="12" fill="currentColor">'+E(r[0])+'</text><rect x="130" y="'+(i*30+4)+'" width="'+Math.max(4,r[1]/mx*400)+'" height="20" style="fill:var(--c-acc)"/><text x="'+(138+r[1]/mx*400)+'" y="'+(i*30+19)+'" font-family="JetBrains Mono" font-size="12" font-weight="700" fill="currentColor">'+r[1]+'</text>').join('')||'<text y="20" fill="currentColor" font-size="13">Belum ada aktivitas</text>';
+$('#ch').innerHTML=rows.map(r=>'<div><div class="bar-top"><span>'+E(r[0])+'</span><b>'+r[1]+'</b></div><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(1,r[1]/mx*100)+'%"></div></div></div>').join('')||'<p class="sm">Belum ada aktivitas</p>';
 const k=d.config,L=[['Penyimpanan permanen (Upstash)',d.persistent],['Captcha Turnstile',k.captcha],['Shield anti-bot',k.shield],['Blokir VPN/proxy',k.vpnBlock],['API key (API_SECRET)',k.apiKeys]];
 $('#cf').innerHTML=L.map(([a,b])=>'<div><span class="dot '+(b?'y':'x')+'"></span>'+a+' — '+(b?'aktif':'mati')+'</div>').join('')+(d.kv&&d.kv.ok?'<p class="sm">Redis terhubung. Kunci &amp; angka tersimpan permanen.</p>':'<p class="sm err">Redis TIDAK tersambung: '+E((d.kv&&d.kv.err)||'env belum diisi')+'. Selama ini merah, kunci &amp; angka tidak akan tercatat.</p>');
 $('#ks').innerHTML=d.keys.length?'<div class="tw"><table>'+d.keys.map(x=>{const rv=d.revoked.includes(x.i);return '<tr><td><code>'+E(x.i)+'</code></td><td>'+E(x.n)+'</td><td>'+new Date(x.t).toLocaleDateString('id-ID')+'</td><td>'+(rv?'dicabut':'<button class="bt s" data-rv="'+E(x.i)+'">Cabut</button>')+'</td></tr>'}).join('')+'</table></div>':'Belum ada kunci tercatat.';
 $('#ev').innerHTML=d.events.map(e=>'<div>'+new Date(e.t).toLocaleTimeString('id-ID')+' · '+E(e.k)+' '+E(e.m)+'</div>').join('')||'Belum ada.'}
-$('#go').onclick=async()=>{$('#er').textContent='';try{const r=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('#pw').value})});const j=await r.json();if(!r.ok)return $('#er').textContent=j.error;tk=j.token;sessionStorage.tm_adm=tk;$('#pw').value='';load();tm=setInterval(load,5000)}catch{$('#er').textContent='Gagal terhubung'}};
+$('#go').onclick=async()=>{$('#er').textContent='';try{const r=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('#pw').value})});const j=await r.json();if(!r.ok)return $('#er').textContent=j.error;tk=j.token;sessionStorage.tm_adm=tk;$('#pw').value='';load();start()}catch{$('#er').textContent='Gagal terhubung'}};
 const post=(r,b)=>fetch('/api/admin?r='+r,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk},body:JSON.stringify(b)}).then(x=>x.json());
 document.addEventListener('click',async e=>{const t=e.target;if(t.dataset.rv){await post('revoke',{i:t.dataset.rv});load()}});
 $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#go').click()};$('#out').onclick=()=>out('');
-if(tk){load();tm=setInterval(load,5000)}
+function start(){clearInterval(tm);tm=setInterval(()=>{if(!document.hidden)load()},10000)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tk)load()});
+if(tk){load();start()}
 </script></body></html>
