@@ -80,7 +80,6 @@ body {
   font-family: var(--font);
   background: var(--bg);
   background-image: var(--bg-grad);
-  background-attachment: fixed;
   color: var(--text);
   min-height: 100dvh;
   line-height: 1.5;
@@ -113,8 +112,6 @@ body {
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   color: var(--text-2);
   display: grid;
   place-items: center;
@@ -136,8 +133,6 @@ body {
 /* Panels */
 .panel {
   background: var(--surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
@@ -163,12 +158,12 @@ body {
   border-radius: 50%;
   background: var(--ok);
   box-shadow: 0 0 0 3px var(--ok-dim), 0 0 10px var(--ok);
-  animation: pulse-live 2s ease-in-out infinite;
+  animation: pulse-live 2s ease-in-out infinite;will-change:opacity;
 }
 
 @keyframes pulse-live {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 3px var(--ok-dim), 0 0 10px var(--ok); }
-  50% { opacity: 0.75; box-shadow: 0 0 0 5px var(--ok-dim), 0 0 14px var(--ok); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
 }
 
 .address-box {
@@ -588,8 +583,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   z-index: 50;
   display: flex;
   align-items: flex-end;
@@ -924,8 +917,6 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
   width: 100%;
   max-width: 360px;
   background: var(--surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1.5px solid var(--c-ink);
   border-radius: var(--radius);
   padding: 32px 24px;
@@ -2465,7 +2456,7 @@ applyLang();
       save();msgCount.textContent=String(state.messages.length);inboxSig=null;renderInbox();
     });
   }
-  setInterval(function(){if(!state.sid&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},1000);
+  setInterval(function(){if(!state.sid&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},3000);
 })();
 </script>
 </body>
