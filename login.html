@@ -26,4 +26,4 @@ $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#go').click()};$('#out').onclick=()
 function start(){clearInterval(tm);tm=setInterval(()=>{if(!document.hidden)load()},10000)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tk)load()});
 if(tk){load();start()}
-</script></body></html>
+</script><script src="/micro.js" defer></script></body></html>
