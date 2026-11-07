@@ -1149,18 +1149,16 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
     </div>
   </div>
 
-  <div class="sheet-backdrop" id="settingsBackdrop" hidden>
-    <div class="sheet" role="dialog" aria-modal="true" aria-label="Pengaturan" data-i18n-aria="settings">
-      <div class="sheet-bar set-bar">
-        <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup" data-i18n-aria="close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="18" height="18">
-            <path d="M6 6l12 12M18 6L6 18"/>
-          </svg>
-        </button>
+  <div class="dr" id="settingsBackdrop" hidden>
+    <div class="dr-panel" role="dialog" aria-modal="true" aria-label="Pengaturan" data-i18n-aria="settings">
+      <div class="dr-bar">
+        <a class="dr-brand" href="/"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
+        <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup" data-i18n-aria="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
-      <div class="settings-body">
-        <div class="settings-section">
-          <div class="settings-label" data-i18n="language">Bahasa</div>
+      <div class="dr-body">
+        <nav class="dr-nav" aria-label="Menu utama"><a href="#top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3.5v-5h3V20H17a1 1 0 0 0 1-1v-9"/></svg><span data-i18n="navHome">Beranda</span></a><a href="#fitur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span data-i18n="navFeatures">Fitur</span></a><a href="#cara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8.2 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.8"/></svg><span data-i18n="navHow">Cara kerja</span></a><a href="#faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7"/><path d="M12 17v.01"/></svg><span data-i18n="navFaq">FAQ</span></a><a href="/docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg><span>API</span></a></nav>
+        <div class="dr-sec">
+          <div class="dr-label" data-i18n="language">Bahasa</div>
           <div class="lang-opts seg">
             <button type="button" class="lang-opt" data-lang="id" id="langId">
               <span class="flag" aria-hidden="true"><svg viewBox="0 0 3 2" width="27" height="18" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="1" fill="#CE1126"/><rect y="1" width="3" height="1" fill="#fff"/></svg></span>
@@ -1172,68 +1170,21 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
             </button>
           </div>
         </div>
-        <div class="settings-section">
-          <div class="settings-label" data-i18n="account">Akun</div>
-          <div class="set-list">
-            <a class="settings-row contact-link" href="/login">
-              <div class="contact-icon acct" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-              </div>
-              <div class="settings-row-text"><div class="settings-row-title" data-i18n="login">Login</div></div>
-            </a>
+        <div class="dr-sec">
+          <div class="dr-label" data-i18n="account">Akun</div>
+          <a class="dr-link" href="/login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg><span data-i18n="login">Login</span></a>
+        </div>
+        <div class="dr-sec">
+          <div class="dr-label" data-i18n="contact">Kontak</div>
+          <a class="dr-link" href="mailto:muhammadfajar4p@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg><span data-i18n="emailLabel">Email</span></a>
+          <a class="dr-link" href="https://t.me/amurax" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4L3 11l6 2.2L11.5 20l3-4.2L19 19.5z"/><path d="M9 13.2L21 4"/></svg><span>Telegram</span></a>
+        </div>
+        <div class="dr-dev">
+          <img class="dr-avatar" src="/dev.jpg" width="44" height="44" alt="">
+          <div>
+            <div class="dr-name">JarZz <span class="dr-role" data-i18n="developer">Developer</span></div>
+            <div class="dr-meta"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="location">Indonesia</span></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M3 12c3-4.5 7-6 11-4.5 2 .7 4 2.3 6 4.5-2 2.2-4 3.8-6 4.5-4 1.5-8 0-11-4.5z"/><circle cx="16" cy="11" r=".6"/></svg><span data-i18n="hobby">Hobi: memancing</span></span></div>
           </div>
-        </div>
-        <div class="settings-section">
-          <div class="settings-label" data-i18n="developer">Developer</div>
-          <div class="dev-profile">
-            <img class="dev-avatar" src="data:image/jpeg;base64,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" alt="JarZz" width="72" height="72" />
-            <div class="dev-name">JarZz</div>
-            <div class="dev-meta">
-              <div class="dev-meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="14" height="14">
-                  <path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/>
-                  <circle cx="12" cy="10" r="2.5"/>
-                </svg>
-                <span data-i18n="location">Indonesia</span>
-              </div>
-              <div class="dev-meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="14" height="14">
-                  <path d="M4 14c2 0 3-1 5-1s3 1 5 1 3-1 5-1"/>
-                  <path d="M12 4v3"/>
-                  <path d="M8 9l-2 2"/>
-                  <path d="M16 9l2 2"/>
-                  <circle cx="12" cy="7" r="1.5"/>
-                  <path d="M6 18c1.5-2 3.5-3 6-3s4.5 1 6 3"/>
-                </svg>
-                <span data-i18n="hobby">Hobi: memancing</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="settings-section">
-          <div class="settings-label" data-i18n="contact">Kontak</div>
-          <div class="set-list">
-          <a class="settings-row contact-link" href="mailto:muhammadfajar4p@gmail.com">
-            <div class="contact-icon email" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-              </svg>
-            </div>
-            <div class="settings-row-text">
-              <div class="settings-row-title" data-i18n="emailLabel">Email</div>
-            </div>
-          </a>
-          <a class="settings-row contact-link" href="https://t.me/amurax" target="_blank" rel="noopener noreferrer">
-            <div class="contact-icon telegram" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-              </svg>
-            </div>
-            <div class="settings-row-text">
-              <div class="settings-row-title">Telegram</div>
-            </div>
-          </a>
-        </div>
         </div>
       </div>
     </div>
