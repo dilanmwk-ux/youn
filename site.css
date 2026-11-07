@@ -378,3 +378,55 @@ html{scroll-behavior:smooth}
 .lgin-err:empty{display:none}
 .lgin-err::before{content:"";flex:none;width:16px;height:16px;margin-top:1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center/contain no-repeat}
 @keyframes errIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   Menu hamburger: panel geser dari kanan. Satu komponen untuk semua
+   halaman (index memakai markup statis, docs/login dibuat oleh micro.js)
+   ============================================================ */
+.dr{position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end;align-items:stretch;background:rgba(3,4,8,.62);opacity:0;transition:opacity .28s}
+.dr.open{opacity:1}
+.dr[hidden]{display:none}
+.dr-panel{display:flex;flex-direction:column;width:min(88vw,340px);height:100dvh;padding-top:env(safe-area-inset-top);overflow:hidden;color:var(--c-ink);background-color:var(--c-card);background-image:var(--grad-card);border-left:1px solid var(--c-line2);border-radius:22px 0 0 22px;box-shadow:-24px 0 60px -20px rgba(0,0,0,.85);transform:translateX(104%);transition:transform .42s var(--ease-out);touch-action:pan-y}
+.dr.open .dr-panel{transform:none}
+.dr-bar{flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px 18px;border-bottom:1px solid var(--c-line)}
+.dr-brand{display:inline-flex;align-items:center;gap:9px;font:800 18px var(--f);letter-spacing:-.03em;color:var(--c-ink);text-decoration:none}
+.dr-brand svg{color:var(--c-acc);filter:drop-shadow(0 0 8px rgba(227,194,125,.4))}
+.dr-body{flex:1;display:flex;flex-direction:column;gap:18px;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px max(18px,env(safe-area-inset-bottom))}
+.dr-nav,.dr-sec{display:flex;flex-direction:column;gap:2px}
+.dr-nav{padding-bottom:14px;border-bottom:1px solid var(--c-line)}
+.dr-label{padding:0 12px 6px;font:600 12.5px var(--f);color:var(--c-dim)}
+.dr .seg{margin:0 2px}
+
+/* Baris menu, dipakai bersama oleh menu utama, akun, dan kontak */
+.dr-nav a,.dr-link{display:flex;align-items:center;gap:14px;min-height:48px;padding:0 12px;border-radius:12px;font:600 16px var(--f);color:var(--c-ink);text-decoration:none;transition:background-color .18s,color .18s,transform .25s var(--ease-spring)}
+.dr-nav a svg,.dr-link svg{width:22px;height:22px;flex:none;color:var(--c-mut);transition:color .18s,transform .3s var(--ease-spring)}
+.dr-nav a:hover,.dr-nav a:focus-visible,.dr-link:hover,.dr-link:focus-visible,.dr-nav a[aria-current=page]{background:var(--c-acc-dim);color:var(--c-acc-hi)}
+.dr-nav a:hover svg,.dr-nav a:focus-visible svg,.dr-link:hover svg,.dr-link:focus-visible svg,.dr-nav a[aria-current=page] svg{color:var(--c-acc)}
+.dr-nav a:hover svg,.dr-link:hover svg{transform:scale(1.08)}
+.dr-nav a:active,.dr-link:active{background:rgba(227,194,125,.16);transform:scale(.98);transition-duration:.07s}
+
+/* Developer: footer kecil di dasar panel */
+.dr-dev{margin-top:auto;display:flex;align-items:center;gap:12px;padding:14px 12px 0;border-top:1px solid var(--c-line)}
+.dr-avatar{flex:none;width:44px;height:44px;border-radius:50%;object-fit:cover;background:#05060a;border:1px solid var(--c-line2)}
+.dr-name{font:800 16px var(--f);letter-spacing:-.02em}
+.dr-role{margin-left:6px;padding:1px 8px;vertical-align:2px;font:600 11.5px var(--f);letter-spacing:0;color:var(--c-acc);background:var(--c-acc-dim);border:1px solid var(--c-line2);border-radius:999px}
+.dr-meta{display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:3px;font:500 12.5px var(--f);color:var(--c-mut)}
+.dr-meta>span{display:inline-flex;align-items:center;gap:5px}
+
+/* Isi masuk berurutan saat panel dibuka */
+.dr.open .dr-nav a,.dr.open .dr-sec,.dr.open .dr-dev{animation:drawerItem .45s var(--ease-out) both}
+.dr.open .dr-nav a:nth-child(1){animation-delay:.10s}
+.dr.open .dr-nav a:nth-child(2){animation-delay:.14s}
+.dr.open .dr-nav a:nth-child(3){animation-delay:.18s}
+.dr.open .dr-nav a:nth-child(4){animation-delay:.22s}
+.dr.open .dr-nav a:nth-child(5){animation-delay:.26s}
+.dr.open .dr-body>div:nth-of-type(1){animation-delay:.30s}
+.dr.open .dr-body>div:nth-of-type(2){animation-delay:.34s}
+.dr.open .dr-body>div:nth-of-type(3){animation-delay:.38s}
+.dr.open .dr-body>div:nth-of-type(4){animation-delay:.42s}
+@keyframes drawerItem{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+
+/* HP: header ringkas (logo + hamburger), menu pindah ke panel.
+   Layar lebar: menu tetap di header dan tidak diulang di panel. */
+@media(max-width:640px){.site-head .nvl,.wrap>.sh .nvl{display:none}}
+@media(min-width:641px){.dr-nav{display:none}}
