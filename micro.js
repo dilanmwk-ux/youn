@@ -176,8 +176,7 @@
       '<a class="dr-link" href="mailto:muhammadfajar4p@gmail.com">' + I('<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/>') + '<span>Email</span></a>' +
       '<a class="dr-link" href="https://t.me/amurax" target="_blank" rel="noopener noreferrer">' + I('<path d="M21 4L3 11l6 2.2L11.5 20l3-4.2L19 19.5z"/><path d="M9 13.2L21 4"/>') + '<span>Telegram</span></a></div>' +
       '<div class="dr-dev"><img class="dr-avatar" src="/dev.jpg" width="44" height="44" alt=""><div><div class="dr-name">JarZz <span class="dr-role">Developer</span></div>' +
-      '<div class="dr-meta"><span>' + pin + '<span>Indonesia</span></span><span>' + fish + '<span>Hobi: memancing</span></span></div></div></div>' +
-      '</div></div>';
+      '</div></div></div></div>';
     document.body.appendChild(sb);
     var closeBtn = sb.querySelector('#btnCloseSettings');
     var openD = function () {
