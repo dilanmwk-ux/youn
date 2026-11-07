@@ -410,8 +410,6 @@ html{scroll-behavior:smooth}
 .dr-avatar{flex:none;width:44px;height:44px;border-radius:50%;object-fit:cover;background:#05060a;border:1px solid var(--c-line2)}
 .dr-name{font:800 16px var(--f);letter-spacing:-.02em}
 .dr-role{margin-left:6px;padding:1px 8px;vertical-align:2px;font:600 11.5px var(--f);letter-spacing:0;color:var(--c-acc);background:var(--c-acc-dim);border:1px solid var(--c-line2);border-radius:999px}
-.dr-meta{display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:3px;font:500 12.5px var(--f);color:var(--c-mut)}
-.dr-meta>span{display:inline-flex;align-items:center;gap:5px}
 
 /* Isi masuk berurutan saat panel dibuka */
 .dr.open .dr-nav a,.dr.open .dr-sec,.dr.open .dr-dev{animation:drawerItem .45s var(--ease-out) both}
