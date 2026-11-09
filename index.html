@@ -10,1082 +10,102 @@
   <script src="/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-  <style>
-:root {
-  --bg: #07070b;
-  --bg-grad: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(99, 102, 241, 0.18), transparent 55%),
-             radial-gradient(ellipse 80% 50% at 100% 50%, rgba(139, 92, 246, 0.08), transparent 50%),
-             radial-gradient(ellipse 60% 40% at 0% 80%, rgba(59, 130, 246, 0.06), transparent 45%);
-  --surface: rgba(18, 18, 24, 0.88);
-  --surface-solid: #121218;
-  --surface-2: #1a1a22;
-  --surface-3: #22222c;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.14);
-  --border-soft: rgba(255, 255, 255, 0.04);
-  --text: #f4f4f8;
-  --text-2: #a0a0b0;
-  --text-3: #6b6b7b;
-  --accent: #818cf8;
-  --accent-bright: #a5b4fc;
-  --accent-dim: rgba(129, 140, 248, 0.15);
-  --accent-glow: rgba(129, 140, 248, 0.35);
-  --ok: #34d399;
-  --ok-dim: rgba(52, 211, 153, 0.15);
-  --warn: #f87171;
-  --warn-dim: rgba(248, 113, 113, 0.12);
-  --radius: 16px;
-  --radius-sm: 10px;
-  --radius-xs: 8px;
-  --font: "DM Sans", system-ui, -apple-system, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
-  --ease: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.03);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
-}
-
-[data-theme="light"] {
-  --bg: #f5f6fa;
-  --bg-grad: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(99, 102, 241, 0.12), transparent 55%),
-             radial-gradient(ellipse 80% 50% at 100% 50%, rgba(139, 92, 246, 0.06), transparent 50%);
-  --surface: rgba(255, 255, 255, 0.92);
-  --surface-solid: #ffffff;
-  --surface-2: #f0f1f6;
-  --surface-3: #e8e9f0;
-  --border: rgba(15, 23, 42, 0.08);
-  --border-hover: rgba(15, 23, 42, 0.14);
-  --border-soft: rgba(15, 23, 42, 0.04);
-  --text: #0f172a;
-  --text-2: #475569;
-  --text-3: #94a3b8;
-  --accent: #6366f1;
-  --accent-bright: #4f46e5;
-  --accent-dim: rgba(99, 102, 241, 0.12);
-  --accent-glow: rgba(99, 102, 241, 0.25);
-  --ok: #059669;
-  --ok-dim: rgba(5, 150, 105, 0.12);
-  --warn: #dc2626;
-  --warn-dim: rgba(220, 38, 38, 0.1);
-  --shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.1), 0 4px 12px rgba(15, 23, 42, 0.06);
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { -webkit-text-size-adjust: 100%; }
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  background-image: var(--bg-grad);
-  color: var(--text);
-  min-height: 100dvh;
-  line-height: 1.5;
-  font-size: 15px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.shell {
-  position: relative;
-  z-index: 1;
-  max-width: 440px;
-  margin: 0 auto;
-  padding: 18px 16px 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 100dvh;
-}
-
-
-
-
-
-
-
-.icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-2);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: all var(--ease);
-  box-shadow: var(--shadow);
-}
-
-.icon-btn:hover {
-  background: var(--surface-2);
-  color: var(--text);
-  border-color: var(--border-hover);
-  transform: translateY(-1px);
-}
-
-.icon-btn:active { transform: translateY(0); }
-
-
-/* Panels */
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: var(--shadow);
-  transition: border-color var(--ease);
-}
-
-.panel-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.7rem;
-  font-weight: 650;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-3);
-  margin-bottom: 14px;
-}
-
-.live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 3px var(--ok-dim), 0 0 10px var(--ok);
-  animation: pulse-live 2s ease-in-out infinite;will-change:opacity;
-}
-
-@keyframes pulse-live {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .5; }
-}
-
-.address-box {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px 14px;
-  text-align: center;
-  margin-bottom: 14px;
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--ease);
-  position: relative;
-  overflow: hidden;
-}
-
-.address-box::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent 40%, var(--accent-dim) 100%);
-  opacity: 0;
-  transition: opacity var(--ease);
-}
-
-.address-box.ready {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 20px var(--accent-dim);
-}
-
-.address-box.ready::before { opacity: 1; }
-
-.address-box code {
-  font-family: var(--mono);
-  font-size: 0.93rem;
-  font-weight: 500;
-  word-break: break-all;
-  color: var(--text);
-  position: relative;
-  z-index: 1;
-  letter-spacing: -0.01em;
-}
-
-.action-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 9px;
-  margin-bottom: 14px;
-}
-
-.act {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 6px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-2);
-  font-family: var(--font);
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--ease);
-}
-
-.act svg { transition: transform var(--ease); }
-
-.act:hover:not(:disabled) {
-  background: var(--surface-3);
-  color: var(--text);
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.act:hover:not(:disabled) svg { transform: scale(1.1); }
-.act:active:not(:disabled) { transform: translateY(0); }
-.act:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.act.act-warn:hover:not(:disabled) {
-  color: var(--warn);
-  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
-  background: var(--warn-dim);
-}
-
-.act.copied {
-  color: var(--ok);
-  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
-}
-
-.act.spinning svg {
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.custom-row {
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
-}
-
-.field {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  transition: border-color var(--ease), box-shadow var(--ease);
-}
-
-.field:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
-}
-
-.field input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 0.88rem;
-  font-weight: 500;
-  padding: 11px 12px;
-  outline: none;
-}
-
-.field input::placeholder {
-  color: var(--text-3);
-  font-family: var(--font);
-  font-weight: 400;
-}
-
-.field-suffix {
-  padding: 0 12px 0 0;
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  color: var(--text-3);
-  white-space: nowrap;
-  user-select: none;
-}
-
-.btn-solid {
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font);
-  font-size: 0.82rem;
-  font-weight: 650;
-  padding: 0 18px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--ease);
-  box-shadow: 0 2px 12px var(--accent-glow);
-  white-space: nowrap;
-}
-
-.btn-solid:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 18px var(--accent-glow);
-}
-
-.btn-solid:active { transform: translateY(0); }
-.btn-solid:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Inbox */
-.inbox-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
-  min-height: 260px;
-}
-
-.inbox-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.inbox-head h2 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.inbox-head h2 svg {
-  color: var(--text-3);
-}
-
-.count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: var(--accent-dim);
-  color: var(--accent-bright);
-  font-size: 0.72rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.toggle input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-ui {
-  width: 36px;
-  height: 20px;
-  border-radius: 999px;
-  background: var(--surface-3);
-  border: 1px solid var(--border);
-  position: relative;
-  transition: all var(--ease);
-}
-
-.toggle-ui::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text-3);
-  transition: all var(--ease-spring);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.toggle input:checked + .toggle-ui {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.toggle input:checked + .toggle-ui::after {
-  left: 18px;
-  background: #fff;
-}
-
-.toggle-txt {
-  font-size: 0.75rem;
-  font-weight: 550;
-  color: var(--text-3);
-}
-
-.inbox-body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.inbox-body::-webkit-scrollbar { width: 4px; }
-.inbox-body::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 44px 24px;
-  text-align: center;
-  color: var(--text-3);
-}
-
-.empty svg {
-  margin-bottom: 6px;
-  opacity: 0.45;
-  color: var(--text-3);
-}
-
-.empty p {
-  color: var(--text-2);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.empty span {
-  font-size: 0.8rem;
-  max-width: 240px;
-  line-height: 1.45;
-}
-
-.msg {
-  display: flex;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border-soft);
-  cursor: pointer;
-  transition: background var(--ease);
-  animation: in 0.28s ease;
-}
-
-@keyframes in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
-
-.msg:hover { background: var(--surface-2); }
-.msg:active { background: var(--bg); }
-
-.msg-av {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--accent-dim), var(--surface-3));
-  color: var(--accent-bright);
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
-.msg-av.has-logo { padding: 0; }
-.msg-av img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.msg-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.msg-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 2px;
-}
-
-.msg-from {
-  font-weight: 600;
-  font-size: 0.88rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.msg-time {
-  font-size: 0.7rem;
-  color: var(--text-3);
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.msg-sub {
-  font-size: 0.84rem;
-  color: var(--text-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.msg-ex {
-  font-size: 0.78rem;
-  color: var(--text-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 2px;
-}
-
-.msg.unread .msg-from { color: var(--text); }
-.msg.unread .msg-sub { color: var(--text); font-weight: 550; }
-.msg.unread {
-  background: linear-gradient(90deg, var(--accent-dim), transparent 50%);
-}
-
-/* Sheet */
-.sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 50;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.sheet-backdrop[hidden] { display: none; }
-.sheet-backdrop.open { opacity: 1; }
-
-.sheet {
-  background: var(--surface-solid);
-  border: 1px solid var(--border);
-  border-bottom: 0;
-  border-radius: var(--radius) var(--radius) 0 0;
-  width: 100%;
-  max-width: 440px;
-  max-height: 94dvh;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(100%);
-  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-}
-
-.sheet-backdrop.open .sheet {
-  transform: translateY(0);
-}
-
-@media (min-width: 480px) {
-  .sheet-backdrop {
-    align-items: center;
-  }
-  .sheet {
-    border-radius: var(--radius);
-    border-bottom: 1px solid var(--border);
-    max-height: 92dvh;
-    margin-bottom: 0;
-  }
-}
-
-.sheet-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 0;
-  flex-shrink: 0;
-}
-
-.sheet-meta {
-  padding: 8px 18px 12px;
-  border-bottom: 1px solid var(--border-soft);
-  flex-shrink: 0;
-}
-
-.sheet-from {
-  font-size: 0.78rem;
-  color: var(--text-3);
-  margin-bottom: 4px;
-  word-break: break-all;
-}
-
-.sheet-subject {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  word-break: break-word;
-}
-
-.sheet-date {
-  display: block;
-  font-size: 0.72rem;
-  color: var(--text-3);
-  margin-top: 6px;
-}
-
-.sheet-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 16px 18px 24px;
-  font-size: 0.9rem;
-  line-height: 1.65;
-  color: var(--text);
-  word-break: break-word;
-  -webkit-overflow-scrolling: touch;
-}
-
-.sheet-content a {
-  color: var(--accent-bright);
-}
-
-.sheet-content img {
-  max-width: 100% !important;
-  height: auto !important;
-}
-
-.sheet-content pre {
-  white-space: pre-wrap;
-  font-family: var(--font);
-}
-
-.sheet-content.frame {
-  padding: 0;
-  flex: 1 1 auto;
-  min-height: 45vh;
-  height: auto;
-}
-
-.sheet-content.frame iframe {
-  width: 100%;
-  height: 100%;
-  min-height: 45vh;
-  border: none;
-  background: #fff;
-}
-
-.sheet-content table {
-  max-width: 100% !important;
-  border-collapse: collapse;
-}
-
-.sheet-content td, .sheet-content th {
-  max-width: 100%;
-  word-break: break-word;
-}
-
-.sheet-foot {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px 16px;
-  border-top: 1px solid var(--border-soft);
-  flex-shrink: 0;
-}
-
-.img-bar {
-  display: flex;
-  gap: 8px;
-  padding: 10px 16px;
-  border-top: 1px solid var(--border-soft);
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.img-bar span {
-  font-size: 0.75rem;
-  color: var(--text-3);
-}
-
-.img-bar .btn-ghost { padding: 7px 10px; font-size: 0.76rem; }
-
-@media (min-width: 480px) {
-  .sheet-content.frame {
-    min-height: 55vh;
-  }
-  .sheet-content.frame iframe {
-    min-height: 55vh;
-  }
-}
-
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  font-family: var(--font);
-  font-size: 0.82rem;
-  font-weight: 550;
-  cursor: pointer;
-  color: var(--text-2);
-  transition: all var(--ease);
-}
-
-.btn-ghost:hover {
-  background: var(--surface-3);
-  color: var(--text);
-  border-color: var(--border-hover);
-}
-
-.btn-ghost.danger { color: var(--warn); }
-.btn-ghost.danger:hover {
-  background: var(--warn-dim);
-  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
-  color: var(--warn);
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(70px);
-  background: var(--surface-solid);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 11px 18px;
-  border-radius: 999px;
-  font-size: 0.84rem;
-  font-weight: 550;
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  white-space: nowrap;
-  max-width: 90vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: var(--shadow-lg);
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.toast.ok {
-  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
-  color: var(--ok);
-}
-
-.toast.err {
-  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
-  color: var(--warn);
-}
-
-.foot {
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--text-3);
-  padding: 4px 8px 0;
-  line-height: 1.4;
-  opacity: 0.85;
-}
-
-@media (max-width: 360px) {
-  .shell { padding: 14px 12px 28px; gap: 12px; }
-  .act { padding: 10px 4px; font-size: 0.68rem; }
-  .address-box code { font-size: 0.85rem; }
-}
-
-@supports (padding: max(0px)) {
-  .shell {
-    padding-bottom: max(36px, env(safe-area-inset-bottom));
-  }
-}
-
-[hidden] { display: none !important; }
-
-/* Settings */
-.set-bar {
-  display: flex; align-items: center; justify-content: flex-end;
-  padding: 18px 18px 12px; flex-shrink: 0;
-}
-.set-bar h3 { font: 800 22px var(--f); letter-spacing: -0.02em; }
-.settings-body {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 4px 18px max(24px, env(safe-area-inset-bottom));
-  display: flex; flex-direction: column; gap: 22px;
-}
-.settings-label {
-  font: 700 11px var(--m); letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--c-mut); margin-bottom: 8px;
-}
-
-/* Kontrol segmen (tema & bahasa) */
-.seg {
-  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px;
-  border: 1.5px solid var(--c-ink); border-radius: var(--r); background: var(--c-bg);
-}
-.seg button {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 8px; border: 0; border-radius: 4px; background: transparent;
-  color: var(--c-mut); font: 700 14px var(--f); cursor: pointer;
-  transition: background 0.12s, color 0.12s;
-}
-.seg button:hover { color: var(--c-ink); }
-.seg button.active { background: var(--c-ink); color: var(--c-bg); }
-.lang-opt .flag { display: flex; width: 22px; height: 15px; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
-.lang-opt .flag svg { width: 100%; height: 100%; }
-
-/* Developer */
-.dev-profile {
-  display: flex; align-items: center; gap: 14px; padding: 14px;
-  background: var(--c-card); border: 1.5px solid var(--c-ink); border-radius: var(--r);
-}
-.dev-avatar {
-  width: 58px; height: 58px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-  border: 1.5px solid var(--c-ink); background: var(--c-bg);
-}
-.dev-name { font: 800 18px var(--f); letter-spacing: -0.02em; margin-bottom: 4px; }
-.dev-meta { display: flex; flex-direction: column; gap: 3px; }
-.dev-meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--c-mut); }
-.dev-meta-item svg { flex-shrink: 0; }
-
-/* Daftar kontak */
-.set-list { background: var(--c-card); border: 1.5px solid var(--c-ink); border-radius: var(--r); overflow: hidden; }
-a.contact-link {
-  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-  color: var(--c-ink); text-decoration: none; transition: background 0.12s;
-}
-a.contact-link + a.contact-link { border-top: 1.5px solid color-mix(in srgb, var(--c-ink) 18%, transparent); }
-a.contact-link:hover, a.contact-link:active { background: color-mix(in srgb, var(--c-acc) 9%, transparent); }
-a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(--c-mut); }
-.settings-row-text { flex: 1; min-width: 0; }
-.settings-row-title { font: 700 15px var(--f); }
-.contact-icon { width: 36px; height: 36px; border-radius: var(--r); display: grid; place-items: center; flex-shrink: 0; }
-.contact-icon.email { background: color-mix(in srgb, var(--c-acc) 16%, transparent); color: var(--c-acc); }
-.contact-icon.telegram { background: rgba(34, 158, 217, 0.16); color: #229ed9; }
-
-/* Gate */
-.gate {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: var(--bg);
-  background-image: var(--bg-grad);
-  display: grid;
-  place-items: center;
-  padding: 20px;
-}
-
-.gate[hidden] { display: none; }
-
-.gate-card {
-  width: 100%;
-  max-width: 360px;
-  background: var(--surface);
-  border: 1.5px solid var(--c-ink);
-  border-radius: var(--radius);
-  padding: 32px 24px;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.gate-card svg {
-  color: var(--accent);
-  margin-bottom: 4px;
-  filter: drop-shadow(0 0 12px var(--accent-glow));
-}
-
-.gate-card h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.gate-card p {
-  font-size: 0.88rem;
-  color: var(--text-2);
-  line-height: 1.45;
-}
-
-#cfBox {
-  margin: 8px 0;
-  min-height: 65px;
-  display: flex;
-  justify-content: center;
-}
-
-.gate-err {
-  color: var(--warn) !important;
-  font-size: 0.82rem !important;
-  min-height: 1.2em;
-}
-
-.gate-card .btn-ghost {
-  margin-top: 4px;
-}
-
-.block-scr .gate-card {
-  max-width: 320px;
-}
-</style>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  
 
 <link rel="stylesheet" href="/site.css"></head>
 <body>
   <div class="shell" id="top">
     <header class="site-head"><div class="container sh">
       <a class="lg" href="/"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
-      <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#cara" data-i18n="navHow">Cara kerja</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
+      <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#cara" data-i18n="navHow">Cara pakai</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
       <div class="sh-act">
-        <button type="button" class="icon-btn ib" id="btnSettings" aria-label="Pengaturan" data-i18n-aria="settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"/>
-          </svg>
+        <button type="button" class="icon-btn" id="btnSettings" aria-label="Menu" aria-haspopup="dialog" data-i18n-aria="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
       </div>
     </div></header>
 
     <main>
-      <section class="container hero">
-        <div class="hero-copy">
-          <p class="tg" data-i18n="heroTag">Email sementara · gratis</p>
-          <h1 data-i18n="heroTitle">Inbox sekali pakai, tanpa ribet.</h1>
-          <p class="lead" data-i18n="heroDesc">Dapatkan alamat email sementara untuk mendaftar, mengunduh, atau mencoba layanan, tanpa membuka email utamamu ke spam.</p>
-          <ul class="chips">
-            <li data-i18n="chip1">Tanpa daftar</li>
-            <li data-i18n="chip2">Auto-refresh</li>
-            <li data-i18n="chip3">Ada API</li>
-          </ul>
-          <div class="hero-cta">
-            <a class="hb" href="#inbox" data-i18n="ctaInbox">Lihat inbox</a>
-            <a class="hb g" href="/docs" data-i18n="ctaApi">Dokumentasi API</a>
-          </div>
-        </div>
-        <div class="hero-tool">
-          <section class="panel email-panel">
-      <div class="panel-label">
-        <span class="live-dot"></span>
-        <span data-i18n="activeAddress">Alamat aktif</span>
-      </div>
-
-      <div class="address-box" id="emailBox">
-        <code id="emailAddress">Menyiapkan…</code>
-      </div>
-
-      <div class="action-row">
-        <button type="button" class="act" id="btnCopy" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="16" height="16">
-            <rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/>
-          </svg>
-          <span id="copyLbl" data-i18n="copy">Salin</span>
-        </button>
-        <button type="button" class="act" id="btnRefresh">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="16" height="16">
-            <path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>
-          </svg>
-          <span data-i18n="check">Cek</span>
-        </button>
-        <button type="button" class="act act-warn" id="btnNew">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="16" height="16">
-            <path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/>
-          </svg>
-          <span data-i18n="new">Baru</span>
-        </button>
-      </div>
-
-      <div class="custom-row">
-        <div class="field">
-          <input type="text" id="customUser" placeholder="username" maxlength="20" autocomplete="off" spellcheck="false" data-i18n-placeholder="username" />
-          <span class="field-suffix" id="domainHint">@…</span>
-        </div>
-        <button type="button" class="btn-solid" id="btnCustom" data-i18n="use">Pakai</button>
-      </div>
-    </section>
-        </div>
+      <section class="container intro">
+        <h1 data-i18n="heroTitle">Email sementara, siap dipakai.</h1>
+        <p class="lead" data-i18n="heroDesc">Salin alamat di bawah, pakai untuk mendaftar, lalu baca emailnya di kotak masuk. Tanpa akun.</p>
       </section>
 
       <section class="container" id="inbox">
-        <section class="panel inbox-panel">
-      <div class="inbox-head">
-        <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="16" height="16">
-            <path d="M4 6h16v12H4z"/><path d="M4 8l8 5 8-5"/>
-          </svg>
-          <span data-i18n="inbox">Inbox</span>
-          <span class="count" id="msgCount">0</span>
-        </h2>
-        <label class="toggle">
-          <input type="checkbox" id="autoRefresh" checked />
-          <span class="toggle-ui"></span>
-          <span class="toggle-txt" data-i18n="auto">Auto</span>
-        </label>
-      </div>
+        <div class="ws">
+          <section class="addr-pane" aria-labelledby="addrLbl">
+            <div class="pane-label"><span class="live-dot"></span><span id="addrLbl" data-i18n="activeAddress">Alamat email kamu</span></div>
+            <div class="address-box" id="emailBox"><code id="emailAddress">Menyiapkan…</code></div>
+            <button type="button" class="act primary" id="btnCopy" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>
+              <span id="copyLbl" data-i18n="copy">Salin alamat</span>
+            </button>
+            <div class="act-row">
+              <button type="button" class="act" id="btnRefresh">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+                <span data-i18n="check">Cek inbox</span>
+              </button>
+              <button type="button" class="act" id="btnNew">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <span data-i18n="new">Alamat baru</span>
+              </button>
+            </div>
+            <details class="cust" id="custBox">
+              <summary data-i18n="customTitle">Pakai username sendiri</summary>
+              <div class="custom-row">
+                <div class="field">
+                  <input type="text" id="customUser" placeholder="username" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Username" data-i18n-placeholder="username" />
+                  <span class="field-suffix" id="domainHint">@…</span>
+                </div>
+                <button type="button" class="btn-solid" id="btnCustom" data-i18n="use">Ganti</button>
+              </div>
+              <p class="hint" data-i18n="customHint">3–20 karakter: huruf kecil, angka, titik, strip.</p>
+            </details>
+          </section>
 
-      <div class="inbox-body" id="inboxList">
-        <div class="empty" id="emptyState">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
-            <rect x="6" y="12" width="36" height="26" rx="3"/>
-            <path d="M6 16l18 12 18-12"/>
-          </svg>
-          <p data-i18n="noMessages">Belum ada pesan</p>
-          <span data-i18n="noMessagesHint">Kirim email ke alamat di atas, lalu tunggu sebentar</span>
+          <section class="inbox-pane" aria-labelledby="inboxTtl">
+            <div class="inbox-head">
+              <h2><span id="inboxTtl" data-i18n="inbox">Kotak masuk</span><span class="count" id="msgCount">0</span></h2>
+              <label class="toggle">
+                <input type="checkbox" id="autoRefresh" checked />
+                <span class="toggle-ui"></span>
+                <span class="toggle-txt" data-i18n="auto">Otomatis</span>
+              </label>
+            </div>
+            <div class="inbox-body" id="inboxList">
+              <div class="empty" id="emptyState">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="40" height="40" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2.5"/><path d="M4.5 8l7.5 5.5L19.5 8"/></svg>
+                <p data-i18n="noMessages">Menunggu email masuk</p>
+                <span data-i18n="noMessagesHint">Pakai alamat kamu untuk mendaftar. Email akan muncul di sini otomatis.</span>
+              </div>
+            </div>
+          </section>
         </div>
-      </div>
-    </section>
-      </section>
-
-      <section class="container sec" id="fitur">
-        <p class="tg" data-i18n="featTag">Fitur</p>
-        <h2 data-i18n="featTitle">Sederhana, tapi lengkap</h2>
-        <div class="fgrid"><article class="fc"><div class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22"><path d="M4 6h16v12H4z"/><path d="M4 8l8 5 8-5"/></svg></div><h3 data-i18n="f1_t">Tanpa daftar akun</h3><p data-i18n="f1_d">Alamat langsung siap begitu halaman terbuka. Tidak ada form, tidak ada password.</p></article><article class="fc"><div class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></div><h3 data-i18n="f2_t">Inbox auto-refresh</h3><p data-i18n="f2_d">Pesan baru muncul sendiri. Cukup biarkan tab terbuka sambil mendaftar di layanan lain.</p></article><article class="fc"><div class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3 data-i18n="f3_t">Username sendiri</h3><p data-i18n="f3_d">Mau alamat yang gampang diingat? Pilih username kustom, minimal 3 karakter.</p></article><article class="fc"><div class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22"><path d="M12 3l8 3v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 data-i18n="f4_t">Konten email terisolasi</h3><p data-i18n="f4_d">Isi email dibuka dalam bingkai ter-sandbox, jadi skrip dari pengirim tidak dijalankan.</p></article><article class="fc"><div class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22"><path d="M8 9l-4 3 4 3"/><path d="M16 9l4 3-4 3"/><path d="M13.5 6l-3 12"/></svg></div><h3 data-i18n="f5_t">API untuk developer</h3><p data-i18n="f5_d">REST + JSON dengan API key. Cocok untuk skrip, bot, dan tes otomatis.</p></article><article class="fc"><div class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="22" height="22"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><h3 data-i18n="f6_t">Terang & gelap, ID & EN</h3><p data-i18n="f6_d">Tema dan bahasa bisa diganti kapan saja dan diingat di perangkatmu.</p></article></div>
       </section>
 
       <section class="container sec" id="cara">
-        <p class="tg" data-i18n="howTag">Cara kerja</p>
-        <h2 data-i18n="howTitle">Tiga langkah, selesai</h2>
-        <ol class="steps"><li class="st"><span class="sn">1</span><h3 data-i18n="s1_t">Salin alamatmu</h3><p data-i18n="s1_d">Alamat sementara dibuat otomatis. Tekan Salin, atau buat yang baru kapan pun.</p></li><li class="st"><span class="sn">2</span><h3 data-i18n="s2_t">Pakai untuk mendaftar</h3><p data-i18n="s2_d">Tempel di form pendaftaran atau tujuan lain yang kamu tidak mau kirimi data pribadi.</p></li><li class="st"><span class="sn">3</span><h3 data-i18n="s3_t">Baca pesan masuk</h3><p data-i18n="s3_d">Email tampil di inbox di atas. Buka untuk membaca isinya, hapus kalau sudah selesai.</p></li></ol>
+        <h2 data-i18n="howTitle">Cara pakai</h2>
+        <ol class="steps">
+          <li class="st"><span class="sn">1</span><h3 data-i18n="s1_t">Salin alamat</h3><p data-i18n="s1_d">Alamat dibuat otomatis saat halaman terbuka. Mau yang baru? Tekan Alamat baru.</p></li>
+          <li class="st"><span class="sn">2</span><h3 data-i18n="s2_t">Pakai untuk mendaftar</h3><p data-i18n="s2_d">Tempel di formulir pendaftaran atau layanan lain yang tidak perlu tahu email aslimu.</p></li>
+          <li class="st"><span class="sn">3</span><h3 data-i18n="s3_t">Baca di kotak masuk</h3><p data-i18n="s3_d">Email masuk muncul sendiri. Ketuk untuk membaca, hapus kalau sudah selesai.</p></li>
+        </ol>
+      </section>
+
+      <section class="container sec" id="fitur">
+        <h2 data-i18n="featTitle">Yang kamu dapat</h2>
+        <div class="fgrid">
+          <article class="fc"><h3 data-i18n="f1_t">Tanpa akun</h3><p data-i18n="f1_d">Alamat langsung siap begitu halaman terbuka. Tidak ada formulir dan tidak ada password.</p></article>
+          <article class="fc"><h3 data-i18n="f2_t">Kotak masuk otomatis</h3><p data-i18n="f2_d">Email baru muncul sendiri dalam hitungan detik. Biarkan tab terbuka saat mendaftar di layanan lain.</p></article>
+          <article class="fc"><h3 data-i18n="f3_t">Username sendiri</h3><p data-i18n="f3_d">Mau alamat yang mudah diingat? Pilih username 3–20 karakter.</p></article>
+          <article class="fc"><h3 data-i18n="f4_t">Isi email aman dibuka</h3><p data-i18n="f4_d">Email tampil dalam bingkai terisolasi, jadi skrip dari pengirim tidak dijalankan.</p></article>
+          <article class="fc"><h3 data-i18n="f5_t">API untuk developer</h3><p data-i18n="f5_d">REST + JSON dengan API key. Cocok untuk skrip, bot, dan tes otomatis.</p></article>
+          <article class="fc"><h3 data-i18n="f6_t">Bahasa Indonesia &amp; English</h3><p data-i18n="f6_d">Ganti bahasa kapan saja lewat menu. Pilihanmu diingat di perangkat ini.</p></article>
+        </div>
       </section>
 
       <section class="container sec" id="faq">
-        <p class="tg" data-i18n="faqTag">FAQ</p>
         <h2 data-i18n="faqTitle">Pertanyaan umum</h2>
         <div class="faq"><details class="fq"><summary data-i18n="q1_t">Apakah TempMail gratis?</summary><p data-i18n="q1_d">Ya, dipakai tanpa biaya dan tanpa akun.</p></details><details class="fq"><summary data-i18n="q2_t">Berapa lama pesan disimpan?</summary><p data-i18n="q2_d">Pesan hanya disimpan singkat. Jangan dipakai untuk data penting atau akun yang perlu kamu akses lagi.</p></details><details class="fq"><summary data-i18n="q3_t">Apakah aman untuk akun penting?</summary><p data-i18n="q3_d">Tidak disarankan. Alamat sementara bisa hilang, jadi pakai email tetap untuk bank, kerja, atau akun yang butuh pemulihan.</p></details><details class="fq"><summary data-i18n="q4_t">Kenapa ada verifikasi captcha?</summary><p data-i18n="q4_d">Untuk mencegah penyalahgunaan otomatis. Kalau captcha gagal, muat ulang halaman atau coba verifikasi alternatif.</p></details></div>
       </section>
@@ -1094,31 +114,20 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
         <div class="cta-band">
           <div>
             <h2 data-i18n="ctaBandTitle">Butuh otomatisasi?</h2>
-            <p data-i18n="ctaBandDesc">Buat inbox sementara dari kode lewat API REST. API key dibuat langsung di halaman dokumentasi.</p>
+            <p data-i18n="ctaBandDesc">Buat kotak masuk sementara dari kode lewat REST API. API key dibuat langsung di halaman dokumentasi.</p>
           </div>
-          <a class="hb" href="/docs" data-i18n="ctaApi">Dokumentasi API</a>
+          <a class="hb" href="/docs" data-i18n="ctaApi">Lihat dokumentasi API</a>
         </div>
       </section>
     </main>
 
     <footer class="site-foot">
-      <div class="container">
-        <div class="sf-grid">
-          <div>
-            <a class="lg" href="#top"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
-            <p class="sf-d" data-i18n="footDesc">Email sementara yang cepat dan privat.</p>
-          </div>
-          <nav aria-label="Produk">
-            <h4 data-i18n="footProduct">Produk</h4>
-            <a href="#fitur" data-i18n="navFeatures">Fitur</a>
-            <a href="#cara" data-i18n="navHow">Cara kerja</a>
-            <a href="#faq">FAQ</a>
-          </nav>
-          <nav aria-label="Developer">
-            <h4>Developer</h4>
-            <a href="/docs">API</a>
-          </nav>
+      <div class="container sf">
+        <div>
+          <a class="lg" href="#top"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
+          <p class="sf-d" data-i18n="footDesc">Email sementara yang cepat dan privat.</p>
         </div>
+        <nav aria-label="Tautan"><a href="#cara" data-i18n="navHow">Cara pakai</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
       </div>
     </footer>
   </div>
@@ -1150,13 +159,13 @@ a.contact-link::after { content: "\203A"; font: 700 22px/1 var(--f); color: var(
   </div>
 
   <div class="dr" id="settingsBackdrop" hidden>
-    <div class="dr-panel" role="dialog" aria-modal="true" aria-label="Pengaturan" data-i18n-aria="settings">
+    <div class="dr-panel" role="dialog" aria-modal="true" aria-label="Menu" data-i18n-aria="settings">
       <div class="dr-bar">
         <a class="dr-brand" href="/"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
         <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup" data-i18n-aria="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="dr-body">
-        <nav class="dr-nav" aria-label="Menu utama"><a href="#top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3.5v-5h3V20H17a1 1 0 0 0 1-1v-9"/></svg><span data-i18n="navHome">Beranda</span></a><a href="#fitur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span data-i18n="navFeatures">Fitur</span></a><a href="#cara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8.2 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.8"/></svg><span data-i18n="navHow">Cara kerja</span></a><a href="#faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7"/><path d="M12 17v.01"/></svg><span data-i18n="navFaq">FAQ</span></a><a href="/docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg><span>API</span></a></nav>
+        <nav class="dr-nav" aria-label="Menu utama"><a href="#top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3.5v-5h3V20H17a1 1 0 0 0 1-1v-9"/></svg><span data-i18n="navHome">Beranda</span></a><a href="#cara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8.2 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.8"/></svg><span data-i18n="navHow">Cara pakai</span></a><a href="#fitur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span data-i18n="navFeatures">Fitur</span></a><a href="#faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7"/><path d="M12 17v.01"/></svg><span data-i18n="navFaq">FAQ</span></a><a href="/docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg><span>API</span></a></nav>
         <div class="dr-sec">
           <div class="dr-label" data-i18n="language">Bahasa</div>
           <div class="lang-opts seg">
@@ -1226,40 +235,40 @@ const I18N = {
   id: {
     navHome: 'Beranda',
     navFeatures: 'Fitur',
-    navHow: 'Cara kerja',
+    navHow: 'Cara pakai',
     navFaq: 'FAQ',
-    account: 'Akun',
-    login: 'Login',
+    account: 'Pengelola',
+    login: 'Masuk pengelola',
     heroTag: 'Email sementara · gratis',
-    heroTitle: 'Inbox sekali pakai, tanpa ribet.',
-    heroDesc: 'Dapatkan alamat email sementara untuk mendaftar, mengunduh, atau mencoba layanan, tanpa membuka email utamamu ke spam.',
+    heroTitle: 'Email sementara, siap dipakai.',
+    heroDesc: 'Salin alamat di bawah, pakai untuk mendaftar, lalu baca emailnya di kotak masuk. Tanpa akun.',
     chip1: 'Tanpa daftar',
     chip2: 'Auto-refresh',
     chip3: 'Ada API',
     ctaInbox: 'Lihat inbox',
-    ctaApi: 'Dokumentasi API',
+    ctaApi: 'Lihat dokumentasi API',
     featTag: 'Fitur',
-    featTitle: 'Sederhana, tapi lengkap',
-    f1_t: 'Tanpa daftar akun',
-    f1_d: 'Alamat langsung siap begitu halaman terbuka. Tidak ada form, tidak ada password.',
-    f2_t: 'Inbox auto-refresh',
-    f2_d: 'Pesan baru muncul sendiri. Cukup biarkan tab terbuka sambil mendaftar di layanan lain.',
+    featTitle: 'Yang kamu dapat',
+    f1_t: 'Tanpa akun',
+    f1_d: 'Alamat langsung siap begitu halaman terbuka. Tidak ada formulir dan tidak ada password.',
+    f2_t: 'Kotak masuk otomatis',
+    f2_d: 'Email baru muncul sendiri dalam hitungan detik. Biarkan tab terbuka saat mendaftar di layanan lain.',
     f3_t: 'Username sendiri',
-    f3_d: 'Mau alamat yang gampang diingat? Pilih username kustom, minimal 3 karakter.',
-    f4_t: 'Konten email terisolasi',
-    f4_d: 'Isi email dibuka dalam bingkai ter-sandbox, jadi skrip dari pengirim tidak dijalankan.',
+    f3_d: 'Mau alamat yang mudah diingat? Pilih username 3–20 karakter.',
+    f4_t: 'Isi email aman dibuka',
+    f4_d: 'Email tampil dalam bingkai terisolasi, jadi skrip dari pengirim tidak dijalankan.',
     f5_t: 'API untuk developer',
     f5_d: 'REST + JSON dengan API key. Cocok untuk skrip, bot, dan tes otomatis.',
-    f6_t: 'Dua bahasa, ID & EN',
-    f6_d: 'Bahasa bisa diganti kapan saja dan diingat di perangkatmu.',
+    f6_t: 'Bahasa Indonesia & English',
+    f6_d: 'Ganti bahasa kapan saja lewat menu. Pilihanmu diingat di perangkat ini.',
     howTag: 'Cara kerja',
-    howTitle: 'Tiga langkah, selesai',
-    s1_t: 'Salin alamatmu',
-    s1_d: 'Alamat sementara dibuat otomatis. Tekan Salin, atau buat yang baru kapan pun.',
+    howTitle: 'Cara pakai',
+    s1_t: 'Salin alamat',
+    s1_d: 'Alamat dibuat otomatis saat halaman terbuka. Mau yang baru? Tekan Alamat baru.',
     s2_t: 'Pakai untuk mendaftar',
-    s2_d: 'Tempel di form pendaftaran atau tujuan lain yang kamu tidak mau kirimi data pribadi.',
-    s3_t: 'Baca pesan masuk',
-    s3_d: 'Email tampil di inbox di atas. Buka untuk membaca isinya, hapus kalau sudah selesai.',
+    s2_d: 'Tempel di formulir pendaftaran atau layanan lain yang tidak perlu tahu email aslimu.',
+    s3_t: 'Baca di kotak masuk',
+    s3_d: 'Email masuk muncul sendiri. Ketuk untuk membaca, hapus kalau sudah selesai.',
     faqTag: 'FAQ',
     faqTitle: 'Pertanyaan umum',
     q1_t: 'Apakah TempMail gratis?',
@@ -1271,23 +280,23 @@ const I18N = {
     q4_t: 'Kenapa ada verifikasi captcha?',
     q4_d: 'Untuk mencegah penyalahgunaan otomatis. Kalau captcha gagal, muat ulang halaman atau coba verifikasi alternatif.',
     ctaBandTitle: 'Butuh otomatisasi?',
-    ctaBandDesc: 'Buat inbox sementara dari kode lewat API REST. API key dibuat langsung di halaman dokumentasi.',
+    ctaBandDesc: 'Buat kotak masuk sementara dari kode lewat REST API. API key dibuat langsung di halaman dokumentasi.',
     footDesc: 'Email sementara yang cepat dan privat.',
     footProduct: 'Produk',
-    activeAddress: 'Alamat aktif',
+    activeAddress: 'Alamat email kamu',
     preparing: 'Menyiapkan…',
-    copy: 'Salin',
+    copy: 'Salin alamat',
     copied: 'Tersalin',
-    check: 'Cek',
-    new: 'Baru',
-    use: 'Pakai',
+    check: 'Cek inbox',
+    new: 'Alamat baru',
+    use: 'Ganti',
     username: 'username',
-    inbox: 'Inbox',
-    auto: 'Auto',
-    noMessages: 'Belum ada pesan',
-    noMessagesHint: 'Kirim email ke alamat di atas, lalu tunggu sebentar',
+    inbox: 'Kotak masuk',
+    auto: 'Otomatis',
+    noMessages: 'Menunggu email masuk',
+    noMessagesHint: 'Pakai alamat kamu untuk mendaftar. Email akan muncul di sini otomatis.',
     delete: 'Hapus',
-    settings: 'Pengaturan',
+    settings: 'Menu',
     language: 'Bahasa',
     developer: 'Developer',
     contact: 'Kontak',
@@ -1300,7 +309,7 @@ const I18N = {
     minAgo: ' m',
     hourAgo: ' j',
     emailReady: 'Email siap',
-    usernameSet: 'Username dipasang',
+    usernameSet: 'Username diganti',
     copiedToast: 'Disalin',
     deleted: 'Pesan dihapus',
     deletedLocal: 'Dihapus dari daftar',
@@ -1318,44 +327,46 @@ const I18N = {
     retry: 'Coba lagi',
     reload: 'Muat ulang',
     accessDenied: 'Akses ditolak',
+    customTitle: 'Pakai username sendiri',
+    customHint: '3–20 karakter: huruf kecil, angka, titik, strip.',
   },
   en: {
     navHome: 'Home',
     navFeatures: 'Features',
-    navHow: 'How it works',
+    navHow: 'How to use',
     navFaq: 'FAQ',
-    account: 'Account',
-    login: 'Login',
+    account: 'Admin',
+    login: 'Admin login',
     heroTag: 'Temporary email · free',
-    heroTitle: 'A disposable inbox, zero hassle.',
-    heroDesc: 'Get a temporary email address to sign up, download, or try a service without exposing your real inbox to spam.',
+    heroTitle: 'A temporary email, ready to use.',
+    heroDesc: 'Copy the address below, use it to sign up, then read the email in your inbox. No account needed.',
     chip1: 'No sign-up',
     chip2: 'Auto-refresh',
     chip3: 'API included',
     ctaInbox: 'View inbox',
-    ctaApi: 'API docs',
+    ctaApi: 'View API docs',
     featTag: 'Features',
-    featTitle: 'Simple, yet complete',
-    f1_t: 'No account needed',
-    f1_d: 'Your address is ready as soon as the page opens. No forms, no passwords.',
-    f2_t: 'Auto-refreshing inbox',
-    f2_d: 'New messages show up on their own. Just keep the tab open while you sign up elsewhere.',
+    featTitle: 'What you get',
+    f1_t: 'No account',
+    f1_d: 'Your address is ready as soon as the page opens. No forms and no passwords.',
+    f2_t: 'Auto-updating inbox',
+    f2_d: 'New email shows up on its own within seconds. Keep the tab open while you sign up elsewhere.',
     f3_t: 'Your own username',
-    f3_d: 'Want an address that is easy to remember? Pick a custom username, at least 3 characters.',
-    f4_t: 'Isolated email content',
-    f4_d: 'Email bodies open in a sandboxed frame, so scripts from the sender are not executed.',
+    f3_d: 'Want an address that is easy to remember? Pick a username of 3–20 characters.',
+    f4_t: 'Safe to open',
+    f4_d: 'Email is shown in an isolated frame, so scripts from the sender never run.',
     f5_t: 'API for developers',
     f5_d: 'REST + JSON with an API key. Great for scripts, bots, and automated tests.',
-    f6_t: 'Two languages, ID & EN',
-    f6_d: 'Switch language any time; your choice is remembered on your device.',
+    f6_t: 'Bahasa Indonesia & English',
+    f6_d: 'Switch language any time from the menu. Your choice is remembered on this device.',
     howTag: 'How it works',
-    howTitle: 'Three steps, done',
-    s1_t: 'Copy your address',
-    s1_d: 'A temporary address is created automatically. Hit Copy, or generate a new one any time.',
+    howTitle: 'How to use',
+    s1_t: 'Copy the address',
+    s1_d: 'An address is created when the page opens. Want a different one? Press New address.',
     s2_t: 'Use it to sign up',
-    s2_d: 'Paste it into a sign-up form or anywhere you would rather not share your personal address.',
-    s3_t: 'Read incoming mail',
-    s3_d: 'Messages appear in the inbox above. Open one to read it, delete it when you are done.',
+    s2_d: 'Paste it into a sign-up form or any service that does not need your real email.',
+    s3_t: 'Read it in your inbox',
+    s3_d: 'Email appears on its own. Tap one to read it, delete it when you are done.',
     faqTag: 'FAQ',
     faqTitle: 'Common questions',
     q1_t: 'Is TempMail free?',
@@ -1370,21 +381,21 @@ const I18N = {
     ctaBandDesc: 'Create temporary inboxes from code via the REST API. Generate your API key right on the docs page.',
     footDesc: 'Fast, private temporary email.',
     footProduct: 'Product',
-    activeAddress: 'Active address',
+    activeAddress: 'Your email address',
     preparing: 'Preparing…',
-    copy: 'Copy',
+    copy: 'Copy address',
     copied: 'Copied',
-    check: 'Check',
-    new: 'New',
-    use: 'Use',
+    check: 'Check inbox',
+    new: 'New address',
+    use: 'Change',
     username: 'username',
     inbox: 'Inbox',
     auto: 'Auto',
-    noMessages: 'No messages yet',
-    noMessagesHint: 'Send an email to the address above, then wait a moment',
+    noMessages: 'Waiting for email',
+    noMessagesHint: 'Use your address to sign up. Email will appear here automatically.',
     footer: 'Temporary email · messages stored briefly · do not use for important data',
     delete: 'Delete',
-    settings: 'Settings',
+    settings: 'Menu',
     language: 'Language',
     developer: 'Developer',
     contact: 'Contact',
@@ -1397,7 +408,7 @@ const I18N = {
     minAgo: ' m',
     hourAgo: ' h',
     emailReady: 'Email ready',
-    usernameSet: 'Username set',
+    usernameSet: 'Username changed',
     copiedToast: 'Copied',
     deleted: 'Message deleted',
     deletedLocal: 'Removed from list',
@@ -1415,6 +426,8 @@ const I18N = {
     retry: 'Try again',
     reload: 'Reload',
     accessDenied: 'Access denied',
+    customTitle: 'Use your own username',
+    customHint: '3–20 characters: lowercase letters, numbers, dot, dash.',
   },
 };
 
