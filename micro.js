@@ -1,5 +1,3 @@
-/* Microinteraction TempMail. Murni tambahan: tidak mengubah fungsi inti,
-   hanya mengamati DOM dan menambah kelas animasi (CSS ada di site.css). */
 (function () {
   'use strict';
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -9,7 +7,7 @@
   function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 8); } catch (e) {} }
   function watch(el, opts, fn) { if (el) new MutationObserver(fn).observe(el, opts); }
 
-  /* Getar tipis di HP saat tombol utama ditekan, dan catat tombol terakhir (untuk efek bergetar) */
+  /* Getar tipis di HP saat tombol utama ditekan; catat tombol terakhir (untuk efek bergetar saat galat) */
   var lastBtn = null, lastAt = 0;
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('button,.hb,.bt,.act');
@@ -18,14 +16,39 @@
     if (b.matches('.act,.btn-solid,.bt') || b.closest('.toggle')) buzz(8);
   }, true);
 
-  /* Tombol Baru: ikon berputar sekali */
+  /* Alamat: bagian sebelum @ terang, domain redup. Alamat baru ditulis huruf demi huruf. */
+  var addr = $('#emailAddress');
+  if (addr) {
+    var lastAddr = '';
+    var paint = function () {
+      var v = addr.textContent;
+      var at = v.indexOf('@');
+      if (at < 1) { lastAddr = v; return; }
+      var decorated = !!addr.querySelector('.u');
+      if (v === lastAddr && decorated) return;
+      var isNew = v !== lastAddr;
+      lastAddr = v;
+      var u = document.createElement('span'); u.className = 'u'; u.textContent = v.slice(0, at);
+      var d = document.createElement('span'); d.className = 'd'; d.textContent = v.slice(at);
+      addr.replaceChildren(u, d);
+      if (isNew && !reduce) {
+        addr.style.setProperty('--n', Math.min(v.length, 40));
+        restart(addr, 'type');
+      }
+    };
+    watch(addr, { childList: true, characterData: true, subtree: true }, paint);
+    addr.addEventListener('animationend', function (e) { if (e.animationName === 'type') addr.classList.remove('type'); });
+    paint();
+  }
+
+  /* Alamat baru: ikon berputar sekali */
   var btnNew = $('#btnNew');
   if (btnNew) btnNew.addEventListener('click', function () {
-    btnNew.classList.remove('turn'); void btnNew.offsetWidth; btnNew.classList.add('turn');
+    restart(btnNew, 'turn');
     setTimeout(function () { btnNew.classList.remove('turn'); }, 650);
   });
 
-  /* Salin: ikon jadi centang tergambar + cincin di kotak alamat */
+  /* Salin: ikon jadi centang tergambar, alamat tersorot sebentar seperti teks terpilih */
   var btnCopy = $('#btnCopy');
   if (btnCopy) {
     var ico = $('svg', btnCopy), icoOrig = ico ? ico.innerHTML : '';
@@ -35,39 +58,30 @@
       var on = btnCopy.classList.contains('copied');
       if (on && !ico.classList.contains('tick-ico')) {
         ico.innerHTML = CHECK; ico.classList.add('tick-ico');
-        var box = $('#emailBox'); if (box) restart(box, 'flash');
+        var box = $('#emailBox'); if (box) { restart(box, 'flash'); setTimeout(function () { box.classList.remove('flash'); }, 850); }
       } else if (!on && ico.classList.contains('tick-ico')) {
         ico.classList.remove('tick-ico'); ico.innerHTML = icoOrig;
       }
     });
   }
 
-  /* Alamat berganti: teks muncul seperti diketik */
-  var addr = $('#emailAddress');
-  if (addr && !reduce) {
-    var lastAddr = addr.textContent;
-    watch(addr, { childList: true, characterData: true, subtree: true }, function () {
-      var v = addr.textContent;
-      if (v === lastAddr) return;
-      lastAddr = v;
-      if (v.indexOf('@') < 0) return; // "Menyiapkan…" tidak diketik
-      addr.style.setProperty('--n', Math.min(v.length, 40));
-      restart(addr, 'type');
-    });
-    addr.addEventListener('animationend', function (e) { if (e.animationName === 'type') addr.classList.remove('type'); });
-  }
-
-  /* Jumlah pesan: membal saat angka berubah */
+  /* Jumlah pesan: membal saat berubah. Kalau tab sedang tidak dilihat, judul tab menghitung email baru. */
   var cnt = $('#msgCount');
   if (cnt) {
-    var lastCnt = cnt.textContent;
+    var baseTitle = document.title, unread = 0, lastN = parseInt(cnt.textContent, 10) || 0;
     watch(cnt, { childList: true, characterData: true, subtree: true }, function () {
-      if (cnt.textContent === lastCnt) return;
-      lastCnt = cnt.textContent; restart(cnt, 'bump');
+      var n = parseInt(cnt.textContent, 10) || 0;
+      if (n === lastN) return;
+      restart(cnt, 'bump');
+      if (n > lastN && document.hidden) { unread += n - lastN; document.title = '(' + unread + ') ' + baseTitle; }
+      lastN = n;
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && unread) { unread = 0; document.title = baseTitle; }
     });
   }
 
-  /* Pesan pertama / daftar baru dari kosong: baris masuk berurutan */
+  /* Daftar pesan: saat pertama terisi, baris masuk berurutan */
   var list = $('#inboxList');
   if (list) {
     var prev = 0;
@@ -83,7 +97,7 @@
     });
   }
 
-  /* Toast: garis sisa waktu; error → tombol terakhir yang ditekan bergetar */
+  /* Toast: garis sisa waktu; galat → tombol terakhir yang ditekan bergetar */
   var toastEl = $('#toast');
   if (toastEl) watch(toastEl, { childList: true }, function () {
     restart(toastEl, 'tick');
@@ -95,7 +109,24 @@
     }
   });
 
-  /* Segmented bahasa: pil emas meluncur */
+  /* Username: huruf yang tidak boleh langsung dibuang dan kolom bergetar, jadi jelas apa yang diterima */
+  var cu = $('#customUser');
+  if (cu) cu.addEventListener('input', function () {
+    var clean = cu.value.toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    if (clean !== cu.value) {
+      cu.value = clean;
+      var f = cu.closest('.field') || cu;
+      if (!reduce) { restart(f, 'shake'); setTimeout(function () { f.classList.remove('shake'); }, 480); }
+    }
+  });
+
+  /* Panel username terbuka sendiri kalau pengguna menekan Enter di kolom lain? Tidak. Cukup fokuskan kolom saat dibuka. */
+  var cust = $('#custBox');
+  if (cust && cu) cust.addEventListener('toggle', function () {
+    if (cust.open) setTimeout(function () { cu.focus({ preventScroll: true }); }, 120);
+  });
+
+  /* Pilihan bahasa: pil meluncur ke pilihan aktif */
   $$('.seg').forEach(function (seg) {
     var pill = document.createElement('span');
     pill.className = 'seg-pill'; pill.setAttribute('aria-hidden', 'true');
@@ -130,6 +161,37 @@
     }, { passive: true });
   }
 
+  /* Menu header: garis bawah mengikuti bagian yang sedang dibaca (hanya di beranda) */
+  var links = $$('#siteNav a');
+  if (links.length && $('#cara')) {
+    var map = [], home = null;
+    links.forEach(function (l) {
+      var h = l.getAttribute('href') || '';
+      if (h === '#top') home = l;
+      else if (h.charAt(0) === '#' && document.getElementById(h.slice(1))) map.push([document.getElementById(h.slice(1)), l]);
+    });
+    var curLink = null;
+    var setCur = function (l) {
+      if (l === curLink) return;
+      curLink = l;
+      links.forEach(function (x) { x.removeAttribute('aria-current'); });
+      if (l) l.setAttribute('aria-current', 'location');
+    };
+    var spy = function () {
+      var pick = home;
+      for (var i = 0; i < map.length; i++) {
+        if (map[i][0].getBoundingClientRect().top <= 140) pick = map[i][1];
+      }
+      setCur(pick);
+    };
+    var spyTick = false;
+    window.addEventListener('scroll', function () {
+      if (spyTick) return; spyTick = true;
+      requestAnimationFrame(function () { spy(); spyTick = false; });
+    }, { passive: true });
+    spy();
+  }
+
   /* docs/login: tombol yang teksnya berubah jadi "Tersalin" ikut berubah warna lalu kembali */
   $$('.bt').forEach(function (b) {
     var orig = b.textContent;
@@ -142,8 +204,8 @@
   });
 })();
 
-/* Drawer hamburger. Index memakai markup statis; docs & login dibuat di sini
-   supaya menunya identik. Juga: tutup saat anchor diketuk, geser kanan untuk menutup. */
+/* Menu samping (hamburger). Beranda memakai markup statis; docs & login dibuat di sini
+   supaya isinya identik. Juga: tutup saat anchor diketuk, geser ke kanan untuk menutup. */
 (function () {
   var sb = document.getElementById('settingsBackdrop');
   var onIndex = !!sb, trig = null;
@@ -152,18 +214,16 @@
   if (!sb) {
     trig = document.querySelector('.sh-act a.icon-btn[href="/#pengaturan"]');
     if (!trig) return;
-    var cur = location.pathname.replace(/\/$/, '');
+    var cur = location.pathname.replace(/\/$/, '') || '/';
     var nav = [
       ['/', 'Beranda', '<path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3.5v-5h3V20H17a1 1 0 0 0 1-1v-9"/>'],
+      ['/#cara', 'Cara pakai', '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8.2 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.8"/>'],
       ['/#fitur', 'Fitur', '<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>'],
-      ['/#cara', 'Cara kerja', '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8.2 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.8"/>'],
       ['/#faq', 'FAQ', '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.7"/><path d="M12 17v.01"/>'],
       ['/docs', 'API', '<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/>']
     ].map(function (n) {
       return '<a href="' + n[0] + '"' + (n[0] === cur ? ' aria-current="page"' : '') + '>' + I(n[2]) + '<span>' + n[1] + '</span></a>';
     }).join('');
-    var pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
-    var fish = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><path d="M3 12c3-4.5 7-6 11-4.5 2 .7 4 2.3 6 4.5-2 2.2-4 3.8-6 4.5-4 1.5-8 0-11-4.5z"/><circle cx="16" cy="11" r=".6"/></svg>';
     sb = document.createElement('div');
     sb.className = 'dr'; sb.id = 'settingsBackdrop'; sb.hidden = true;
     sb.innerHTML =
@@ -171,11 +231,11 @@
       '<div class="dr-bar"><a class="dr-brand" href="/"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>' +
       '<button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
       '<div class="dr-body"><nav class="dr-nav" aria-label="Menu utama">' + nav + '</nav>' +
-      '<div class="dr-sec"><div class="dr-label">Akun</div><a class="dr-link" href="/login">' + I('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>') + '<span>Login</span></a></div>' +
+      '<div class="dr-sec"><div class="dr-label">Pengelola</div><a class="dr-link" href="/login">' + I('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>') + '<span>Masuk pengelola</span></a></div>' +
       '<div class="dr-sec"><div class="dr-label">Kontak</div>' +
       '<a class="dr-link" href="mailto:muhammadfajar4p@gmail.com">' + I('<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/>') + '<span>Email</span></a>' +
       '<a class="dr-link" href="https://t.me/amurax" target="_blank" rel="noopener noreferrer">' + I('<path d="M21 4L3 11l6 2.2L11.5 20l3-4.2L19 19.5z"/><path d="M9 13.2L21 4"/>') + '<span>Telegram</span></a></div>' +
-      '<div class="dr-dev"><img class="dr-avatar" src="/dev.jpg" width="44" height="44" alt=""><div><div class="dr-name">JarZz <span class="dr-role">Developer</span></div>' +
+      '<div class="dr-dev"><img class="dr-avatar" src="/dev.jpg" width="42" height="42" alt=""><div><div class="dr-name">JarZz <span class="dr-role">Developer</span></div>' +
       '</div></div></div></div>';
     document.body.appendChild(sb);
     var closeBtn = sb.querySelector('#btnCloseSettings');
