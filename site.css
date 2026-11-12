@@ -391,7 +391,7 @@ th{font:600 12.5px var(--f);color:var(--mut);white-space:nowrap;background:rgba(
   .row .grow{flex:1 1 100%}
   .toast{white-space:normal;text-align:center}
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}.dr-panel,.sheet,.toast,}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 
 
 
@@ -419,18 +419,12 @@ th{font:600 12.5px var(--f);color:var(--mut);white-space:nowrap;background:rgba(
 }
 
 /* ---------- Performance optimizations ---------- */
-.dr-panel,
-.sheet,
-.toast,
-
 .dr-panel { will-change: transform; }
 .sheet { will-change: transform, opacity; }
 .toast { will-change: transform, opacity; }
 
 @media (prefers-reduced-motion: reduce) {
-  .dr-panel, .sheet, .toast, 
-}
-
-
-  .sh-act .icon-btn{display:none}
+  .dr-panel, .sheet, .toast {
+    will-change: auto;
+  }
 }
