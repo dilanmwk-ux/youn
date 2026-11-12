@@ -96,7 +96,8 @@
 <h2 id="curl">Contoh perintah</h2><pre id="ex"></pre>
 <h2 id="stream">Live stream</h2><p>Aplikasi web memakai Server-Sent Events: <code>/api/stream?sid=…&amp;seq=…</code> mengirim event <code>mail</code> begitu email masuk, tanpa polling dari browser.</p>
 </main><script>
-const o=location.origin;
+const SITE_URL='https://guerrillamail.vercel.app';
+const o=(/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|10\.|192\.168\.)/i.test(location.origin)||location.origin==='null'||location.protocol==='file:')?SITE_URL:location.origin;
 document.getElementById('ex').textContent='curl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=new"\n\ncurl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=inbox&sid=SID&seq=0"\n\n# mTempMail\ncurl -H "x-api-key: tm_..." \\\n  "'+o+'/api/v1?a=new&p=mt"';
 const ky=document.getElementById('ky'),ca=document.getElementById('ca');
 document.getElementById('mk').onclick=async()=>{try{const r=await fetch('/api/v1?a=key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('nm').value})});const j=await r.json();ky.style.display='block';ca.style.display=j.key?'flex':'none';ky.textContent=(j.key||j.error)+(j.key&&!j.saved?'\n\n(Catatan: kunci berfungsi, tapi belum tercatat di admin karena penyimpanan Redis belum tersambung)':'')}catch{ky.style.display='block';ky.textContent='Gagal terhubung'}};
