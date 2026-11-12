@@ -566,6 +566,14 @@ function showBlock(reason) {
 }
 $('#blockRetry').addEventListener('click', () => location.reload());
 
+// Alamat situs untuk ditampilkan/dipakai di luar browser. Di WebView/APK origin-nya localhost,
+// jadi pakai domain asli situs. Ganti SITE_URL jika domain berubah.
+const SITE_URL = 'https://guerrillamail.vercel.app';
+function siteOrigin() {
+  const o = location.origin;
+  return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|10\.|192\.168\.)/i.test(o) || o === 'null' || o.startsWith('file:') ? SITE_URL : o;
+}
+
 async function fetchJson(url, ms = 12000, headers = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
@@ -593,7 +601,9 @@ async function fetchJson(url, ms = 12000, headers = {}) {
     }
     if (!res.ok) {
       const ej = await res.json().catch(() => null);
-      throw new Error((ej && typeof ej.error === 'string' && ej.error) || 'HTTP ' + res.status);
+      const err = new Error((ej && typeof ej.error === 'string' && ej.error) || 'HTTP ' + res.status);
+      if (ej && ej.reason) err.reason = ej.reason;
+      throw err;
     }
     return await res.json();
   } catch (e) {
@@ -1005,11 +1015,12 @@ async function checkMail(silent = false) {
 
   try {
     const data = state.provider === 'mt'
-      ? await mtc('inbox', { email: state.email })
+      ? await mtc('inbox', { email: state.email, sid: state.sid })
       : await gm({ f: 'check_email', seq: state.seq });
     if (sid !== state.sid) return; // sesi sudah diganti (tombol Baru), abaikan hasil lama
     if (data && Array.isArray(data.list)) {
       state.fail = 0;
+      mtAuthStrikes = 0;
       // Guerrilla returns newest first sometimes; merge by mail_id
       const map = new Map(state.messages.map((m) => [String(m.mail_id), m]));
       for (const m of data.list) {
@@ -1031,6 +1042,8 @@ async function checkMail(silent = false) {
       state.fail += 1;
       // sesi Guerrilla habis / balasan kosong: pasang ulang sesi & alamat yang sama
       if (state.provider === 'gm' && !e.rate && state.fail >= 2 && state.fail % 2 === 0) healSession();
+      // mTempMail menolak akses ke mailbox (token/IP tidak cocok): buat alamat baru, kalau masih gagal pindah ke Guerrilla
+      if (state.provider === 'mt' && e.reason === 'mt_auth') recoverMt();
       // gagal berulang saat auto-refresh: beri tahu pengguna (dulu diam saja)
       if (silent && state.fail === 3) toast(e.message || t('failInbox'), 'err');
     }
@@ -1038,6 +1051,22 @@ async function checkMail(silent = false) {
     console.error(e);
   } finally {
     btn.classList.remove('spinning');
+  }
+}
+
+let mtRecovering = false;
+let mtAuthStrikes = 0;
+async function recoverMt() {
+  if (mtRecovering) return;
+  mtRecovering = true;
+  try {
+    mtAuthStrikes += 1;
+    // percobaan 1: alamat mTempMail baru; percobaan berikutnya: pindah ke Guerrilla Mail
+    if (mtAuthStrikes > 1) { state.provider = 'gm'; store.set(PROV_KEY, 'gm'); mtAuthStrikes = 0; }
+    state.fail = 0;
+    await createEmail();
+  } finally {
+    mtRecovering = false;
   }
 }
 
@@ -1144,7 +1173,7 @@ function remoteImg(u, mode, ctr) {
   if (/^http:\/\//i.test(u)) u = 'https://' + u.slice(7);
   if (!/^https:\/\//i.test(u)) return null;
   ctr.n++;
-  if (mode === 'proxy' || mode === 'auto') return location.origin + proxyUrl(u);
+  if (mode === 'proxy' || mode === 'auto') return siteOrigin() + proxyUrl(u);
   if (mode === 'direct') return u.replace(/["'()\s]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   return null;
 }
@@ -1273,7 +1302,7 @@ async function openMsg(id) {
 
   try {
     const data = state.provider === 'mt'
-      ? await mtc('read', { email: state.email, id })
+      ? await mtc('read', { email: state.email, sid: state.sid, id })
       : await gm({ f: 'fetch_email', email_id: id });
     if (state.currentId !== id) return; // user sudah tutup / buka pesan lain
     $('#sheetFrom').textContent = data.mail_from || '';
@@ -1309,7 +1338,7 @@ async function deleteMsg() {
   const delId = String(state.currentId);
   let remoteOk = true;
   try {
-    if (state.provider === 'mt') await mtc('del', { email: state.email, id: delId });
+    if (state.provider === 'mt') await mtc('del', { email: state.email, sid: state.sid, id: delId });
     else await gm({ f: 'del_email', 'email_ids[]': delId });
   } catch (e) {
     remoteOk = false;
