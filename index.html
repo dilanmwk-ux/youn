@@ -10,7 +10,7 @@
   <script src="/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   
 
 <link rel="stylesheet" href="/site.css"></head>
@@ -36,6 +36,11 @@
         <div class="ws">
           <section class="addr-pane" aria-labelledby="addrLbl">
             <div class="pane-label"><span class="live-dot"></span><span id="addrLbl" data-i18n="activeAddress">Alamat email kamu</span></div>
+            <div class="prov-lbl" id="provLbl" data-i18n="provider">Penyedia email</div>
+            <div class="seg" id="provSeg" role="group" aria-labelledby="provLbl">
+              <button type="button" data-p="gm" class="active">Guerrilla Mail</button>
+              <button type="button" data-p="mt">mTempMail</button>
+            </div>
             <div class="address-box" id="emailBox"><code id="emailAddress">Menyiapkan…</code></div>
             <button type="button" class="act primary" id="btnCopy" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>
@@ -62,6 +67,7 @@
               </div>
               <p class="hint" data-i18n="customHint">3–20 karakter: huruf kecil, angka, titik, strip.</p>
             </details>
+            <p class="prov-note" id="custNote" hidden data-i18n="custOnlyGm">Username sendiri hanya tersedia di Guerrilla Mail.</p>
           </section>
 
           <section class="inbox-pane" aria-labelledby="inboxTtl">
@@ -329,6 +335,9 @@ const I18N = {
     accessDenied: 'Akses ditolak',
     customTitle: 'Pakai username sendiri',
     customHint: '3–20 karakter: huruf kecil, angka, titik, strip.',
+    provider: 'Penyedia email',
+    custOnlyGm: 'Username sendiri hanya tersedia di Guerrilla Mail.',
+    switched: 'Penyedia dialihkan ke ',
   },
   en: {
     navHome: 'Home',
@@ -428,6 +437,9 @@ const I18N = {
     accessDenied: 'Access denied',
     customTitle: 'Use your own username',
     customHint: '3–20 characters: lowercase letters, numbers, dot, dash.',
+    provider: 'Email provider',
+    custOnlyGm: 'Custom usernames are only available on Guerrilla Mail.',
+    switched: 'Switched provider to ',
   },
 };
 
@@ -442,6 +454,8 @@ const state = {
   timer: null,
   fail: 0,
   lang: 'id',
+  provider: 'gm',
+  hidden: [],
 };
 
 const store = {
@@ -577,7 +591,10 @@ async function fetchJson(url, ms = 12000, headers = {}) {
       err.captcha = true;
       throw err;
     }
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) {
+      const ej = await res.json().catch(() => null);
+      throw new Error((ej && typeof ej.error === 'string' && ej.error) || 'HTTP ' + res.status);
+    }
     return await res.json();
   } catch (e) {
     if (e.name === 'AbortError') throw new Error('Koneksi lambat, coba lagi');
@@ -805,11 +822,38 @@ async function gm(params) {
   }
 }
 
+const PROV_KEY = 'tm_prov';
+const PROV_NAME = { gm: 'Guerrilla Mail', mt: 'mTempMail' };
+
+async function mtc(a, extra) {
+  const q = new URLSearchParams({ a, ...(extra || {}) });
+  const call = () => fetchJson(`/api/mt?${q}`, 15000, { 'x-tm-token': getTok() });
+  try {
+    return await call();
+  } catch (e) {
+    if (!e.captcha) throw e;
+    await ensureCaptcha(true);
+    return await call();
+  }
+}
+
+function syncProv() {
+  document.querySelectorAll('#provSeg button').forEach((b) => b.classList.toggle('active', b.getAttribute('data-p') === state.provider));
+  const mtOn = state.provider === 'mt';
+  const box = $('#custBox'), note = $('#custNote');
+  if (box) box.hidden = mtOn;
+  if (note) note.hidden = !mtOn;
+  if (mtOn && box) box.open = false;
+}
+if (PROV_NAME[store.get(PROV_KEY)]) state.provider = store.get(PROV_KEY);
+
 function save() {
   store.set(KEY, JSON.stringify({
     sid: state.sid,
     email: state.email,
     seq: state.seq,
+    p: state.provider,
+    h: state.hidden.slice(-200),
   }));
 }
 
@@ -822,6 +866,9 @@ function load() {
     state.sid = d.sid;
     state.email = d.email;
     state.seq = d.seq || 0;
+    state.provider = d.p === 'mt' ? 'mt' : 'gm';
+    state.hidden = Array.isArray(d.h) ? d.h.map(String) : [];
+    store.set(PROV_KEY, state.provider);
     return true;
   } catch {
     return false;
@@ -837,32 +884,60 @@ function setEmailUI(addr) {
   domainHint.textContent = domain ? '@' + domain : '@…';
 }
 
+async function createWith(p) {
+  if (p === 'mt') {
+    const d = await mtc('new');
+    if (!d.email_addr || !d.sid_token) throw new Error('Invalid response');
+    return d;
+  }
+  const d = await gm({ f: 'get_email_address', lang: 'en' });
+  if (!d.email_addr || !d.sid_token) throw new Error('Invalid response');
+  return d;
+}
+
 async function createEmail() {
   emailEl.textContent = t('preparing');
   $('#emailBox').classList.remove('ready');
   $('#btnCopy').disabled = true;
 
-  try {
-    const data = await gm({ f: 'get_email_address', lang: 'en' });
-    if (!data.email_addr || !data.sid_token) throw new Error('Invalid response');
-    state.sid = data.sid_token;
-    state.seq = 0;
-    state.messages = [];
-    inboxSig = null;
-    setEmailUI(data.email_addr);
-    save();
-    renderInbox();
-    msgCount.textContent = '0';
-    startPoll();
-    toast(t('emailReady'), 'ok');
-  } catch (e) {
-    emailEl.textContent = t('failCreate');
-    toast(e.message || t('failConnect'), 'err');
-    console.error(e);
+  // coba penyedia pilihan dulu; kalau gagal, otomatis pindah ke penyedia lain
+  const order = [state.provider, state.provider === 'gm' ? 'mt' : 'gm'];
+  let lastErr = null;
+  for (let i = 0; i < order.length; i++) {
+    const p = order[i];
+    try {
+      state.sid = null;
+      const data = await createWith(p);
+      state.provider = p;
+      store.set(PROV_KEY, p);
+      state.sid = data.sid_token;
+      state.seq = 0;
+      state.messages = [];
+      state.hidden = [];
+      inboxSig = null;
+      syncProv();
+      setEmailUI(data.email_addr);
+      save();
+      renderInbox();
+      msgCount.textContent = '0';
+      startPoll();
+      toast(i ? t('switched') + PROV_NAME[p] : t('emailReady'), 'ok');
+      return;
+    } catch (e) {
+      lastErr = e;
+      console.error(e);
+      if (e.blocked) break;
+    }
   }
+  emailEl.textContent = t('failCreate');
+  toast((lastErr && lastErr.message) || t('failConnect'), 'err');
 }
 
 async function setCustom(user) {
+  if (state.provider !== 'gm') {
+    toast(t('custOnlyGm'), 'err');
+    return;
+  }
   if (!state.sid) {
     await createEmail();
   }
@@ -892,6 +967,13 @@ async function setCustom(user) {
 
 async function restore() {
   if (!load()) return false;
+  syncProv();
+  if (state.provider === 'mt') {
+    setEmailUI(state.email);
+    await checkMail(true);
+    startPoll();
+    return true;
+  }
   try {
     // ping session
     const data = await gm({ f: 'get_email_address', lang: 'en' });
@@ -922,7 +1004,9 @@ async function checkMail(silent = false) {
   if (!silent) btn.classList.add('spinning');
 
   try {
-    const data = await gm({ f: 'check_email', seq: state.seq });
+    const data = state.provider === 'mt'
+      ? await mtc('inbox', { email: state.email })
+      : await gm({ f: 'check_email', seq: state.seq });
     if (sid !== state.sid) return; // sesi sudah diganti (tombol Baru), abaikan hasil lama
     if (data && Array.isArray(data.list)) {
       state.fail = 0;
@@ -932,10 +1016,10 @@ async function checkMail(silent = false) {
         if (m.mail_id === 0 || m.mail_id === '0') continue; // welcome placeholder
         map.set(String(m.mail_id), m);
       }
-      state.messages = Array.from(map.values()).sort(
-        (a, b) => Number(b.mail_timestamp || 0) - Number(a.mail_timestamp || 0)
-      );
-      if (typeof data.seq !== 'undefined') state.seq = data.seq;
+      state.messages = Array.from(map.values())
+        .filter((m) => !state.hidden.includes(String(m.mail_id)))
+        .sort((a, b) => Number(b.mail_timestamp || 0) - Number(a.mail_timestamp || 0));
+      if (state.provider === 'gm' && typeof data.seq !== 'undefined') state.seq = data.seq;
       save();
       msgCount.textContent = String(state.messages.length);
       renderInbox();
@@ -946,7 +1030,7 @@ async function checkMail(silent = false) {
     if (sid === state.sid && !e.blocked) {
       state.fail += 1;
       // sesi Guerrilla habis / balasan kosong: pasang ulang sesi & alamat yang sama
-      if (!e.rate && state.fail >= 2 && state.fail % 2 === 0) healSession();
+      if (state.provider === 'gm' && !e.rate && state.fail >= 2 && state.fail % 2 === 0) healSession();
       // gagal berulang saat auto-refresh: beri tahu pengguna (dulu diam saja)
       if (silent && state.fail === 3) toast(e.message || t('failInbox'), 'err');
     }
@@ -1188,7 +1272,9 @@ async function openMsg(id) {
   box.classList.remove('frame');
 
   try {
-    const data = await gm({ f: 'fetch_email', email_id: id });
+    const data = state.provider === 'mt'
+      ? await mtc('read', { email: state.email, id })
+      : await gm({ f: 'fetch_email', email_id: id });
     if (state.currentId !== id) return; // user sudah tutup / buka pesan lain
     $('#sheetFrom').textContent = data.mail_from || '';
     $('#sheetSubject').textContent = data.mail_subject || t('noSubject');
@@ -1220,22 +1306,24 @@ function closeSheet() {
 
 async function deleteMsg() {
   if (!state.currentId) return;
-  const delId = state.currentId;
+  const delId = String(state.currentId);
+  let remoteOk = true;
   try {
-    await gm({ f: 'del_email', 'email_ids[]': delId });
-    state.messages = state.messages.filter((m) => String(m.mail_id) !== String(state.currentId));
-    msgCount.textContent = String(state.messages.length);
-    renderInbox();
-    closeSheet();
-    toast(t('deleted'), 'ok');
+    if (state.provider === 'mt') await mtc('del', { email: state.email, id: delId });
+    else await gm({ f: 'del_email', 'email_ids[]': delId });
   } catch (e) {
-    // still remove locally if API fails
-    state.messages = state.messages.filter((m) => String(m.mail_id) !== String(state.currentId));
-    msgCount.textContent = String(state.messages.length);
-    renderInbox();
-    closeSheet();
-    toast(t('deletedLocal'), 'ok');
+    remoteOk = false;
+    console.error(e);
   }
+  // disembunyikan juga di sisi browser supaya tidak muncul lagi saat inbox dimuat ulang
+  if (!state.hidden.includes(delId)) state.hidden.push(delId);
+  state.messages = state.messages.filter((m) => String(m.mail_id) !== delId);
+  save();
+  msgCount.textContent = String(state.messages.length);
+  inboxSig = null;
+  renderInbox();
+  closeSheet();
+  toast(remoteOk ? t('deleted') : t('deletedLocal'), 'ok');
 }
 
 let pollGen = 0;
@@ -1342,6 +1430,32 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && backdrop.classList.contains('open')) closeSheet();
 });
 
+let switching = false;
+document.querySelectorAll('#provSeg button').forEach((b) => {
+  b.addEventListener('click', async () => {
+    const p = b.getAttribute('data-p');
+    if (!p || p === state.provider || switching) return;
+    switching = true;
+    try {
+      stopPoll();
+      store.del(KEY);
+      state.provider = p;
+      store.set(PROV_KEY, p);
+      state.sid = null;
+      state.messages = [];
+      state.hidden = [];
+      state.seq = 0;
+      inboxSig = null;
+      syncProv();
+      renderInbox();
+      msgCount.textContent = '0';
+      await createEmail();
+    } finally {
+      switching = false;
+    }
+  });
+});
+
 /* Settings */
 function openSettings() {
   settingsBackdrop.hidden = false;
@@ -1381,6 +1495,7 @@ document.addEventListener('keydown', (e) => {
 
 /* Boot */
 applyLang();
+syncProv();
 (async () => {
   try {
     if (navigator.webdriver) return showBlock('bot');
@@ -1405,7 +1520,7 @@ applyLang();
   var b=document.createElement('span');b.id='liveB';b.innerHTML='<i></i>Live';if(h2)h2.appendChild(b);
   var es=null,cur=null;
   function open(){
-    if(!state.sid||state.sid===cur)return;
+    if(state.provider!=='gm'||!state.sid||state.sid===cur)return;
     cur=state.sid;if(es)es.close();
     var t=getTok();
     es=new EventSource('/api/stream?sid='+encodeURIComponent(state.sid)+'&seq='+state.seq+(t?'&t='+encodeURIComponent(t):''));
@@ -1419,7 +1534,7 @@ applyLang();
       save();msgCount.textContent=String(state.messages.length);inboxSig=null;renderInbox();
     });
   }
-  setInterval(function(){if(!state.sid&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},3000);
+  setInterval(function(){if((!state.sid||state.provider!=='gm')&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},3000);
 })();
 </script>
 <script src="/micro.js" defer></script></body>
