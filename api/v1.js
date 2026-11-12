@@ -55,18 +55,19 @@ module.exports = async function handler(req, res) {
   if (!prov.has(p)) return res.status(400).json({ error: 'p harus salah satu dari: ' + prov.ids().join(', ') });
 
   if (p === 'mt') {
-    const email = String(req.query.sid || req.query.email || '');
+    const cip = ip === 'x' ? '' : ip;
+    const email = String(req.query.sid || req.query.email || '').slice(0, 400);
     const id = String(req.query.id || '').slice(0, 120);
-    if (a !== 'new' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'sid (alamat email) wajib diisi' });
+    if (a !== 'new' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(prov.parseSid(email).email)) return res.status(400).json({ error: 'sid (alamat email) wajib diisi' });
     if (a === 'set') return res.status(400).json({ error: 'Penyedia mt tidak mendukung ganti username' });
     if ((a === 'read' || a === 'del') && !id) return res.status(400).json({ error: 'id wajib diisi' });
     await stats.add('v1:' + a, info.n);
     await stats.add('mt:v1');
     try {
-      if (a === 'new') return res.status(200).json(await prov.mt.create());
-      if (a === 'inbox') return res.status(200).json(await prov.mt.inbox(email));
-      if (a === 'read') return res.status(200).json(await prov.mt.read(email, id));
-      return res.status(200).json(await prov.mt.del(email, id));
+      if (a === 'new') return res.status(200).json(await prov.mt.create(cip));
+      if (a === 'inbox') return res.status(200).json(await prov.mt.inbox(email, cip));
+      if (a === 'read') return res.status(200).json(await prov.mt.read(email, id, cip));
+      return res.status(200).json(await prov.mt.del(email, id, cip));
     } catch (e) {
       const code = e && e.code === 404 ? 404 : e && e.code === 429 ? 429 : 502;
       return res.status(code).json({ error: (e && e.message) || 'Upstream gagal' });
