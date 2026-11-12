@@ -2,7 +2,6 @@ const crypto = require('crypto');
 const { rate, getIp } = require('./_shield');
 const stats = require('./_stats');
 const kv = require('./_kv');
-const prov = require('./_providers');
 
 // API publik berkunci. Kunci = HMAC yang ditandatangani API_SECRET (tanpa database).
 const sec = () => process.env.API_SECRET || '';
@@ -50,29 +49,6 @@ module.exports = async function handler(req, res) {
   if (!rate('k:' + (info.i || info.n + info.t), 60)) return res.status(429).json({ error: 'Batas 60 permintaan/menit' });
   const f = FN[a];
   if (!f) return res.status(400).json({ error: 'a harus salah satu dari: ' + Object.keys(FN).join(', ') });
-
-  const p = String(req.query.p || 'gm');
-  if (!prov.has(p)) return res.status(400).json({ error: 'p harus salah satu dari: ' + prov.ids().join(', ') });
-
-  if (p === 'mt') {
-    const cip = ip === 'x' ? '' : ip;
-    const email = String(req.query.sid || req.query.email || '').slice(0, 400);
-    const id = String(req.query.id || '').slice(0, 120);
-    if (a !== 'new' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(prov.parseSid(email).email)) return res.status(400).json({ error: 'sid (alamat email) wajib diisi' });
-    if (a === 'set') return res.status(400).json({ error: 'Penyedia mt tidak mendukung ganti username' });
-    if ((a === 'read' || a === 'del') && !id) return res.status(400).json({ error: 'id wajib diisi' });
-    await stats.add('v1:' + a, info.n);
-    await stats.add('mt:v1');
-    try {
-      if (a === 'new') return res.status(200).json(await prov.mt.create(cip));
-      if (a === 'inbox') return res.status(200).json(await prov.mt.inbox(email, cip));
-      if (a === 'read') return res.status(200).json(await prov.mt.read(email, id, cip));
-      return res.status(200).json(await prov.mt.del(email, id, cip));
-    } catch (e) {
-      const code = e && e.code === 404 ? 404 : e && e.code === 429 ? 429 : 502;
-      return res.status(code).json({ error: (e && e.message) || 'Upstream gagal' });
-    }
-  }
 
   const q = new URLSearchParams({ f, ip: '127.0.0.1', agent: 'TempMail-API/1.0' });
   const map = { sid: 'sid_token', user: 'email_user', seq: 'seq', id: a === 'del' ? 'email_ids[]' : 'email_id' };
