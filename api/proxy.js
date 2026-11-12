@@ -3,6 +3,22 @@ const auth = require('./_auth');
 const { shield } = require('./_shield');
 const net = require('net');
 
+
+// Simple short-lived cache for small images (mainly favicons)
+const imgCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+function getImgCache(key) {
+  const hit = imgCache.get(key);
+  if (hit && Date.now() - hit.t < CACHE_TTL) return hit.v;
+  imgCache.delete(key);
+  return null;
+}
+function setImgCache(key, buf, type) {
+  if (buf.length > 80 * 1024) return; // only cache small images
+  imgCache.set(key, { v: { buf, type }, t: Date.now() });
+  if (imgCache.size > 120) imgCache.delete(imgCache.keys().next().value);
+}
+
 const MAX_BYTES = 4 * 1024 * 1024;
 const MAX_REDIRECTS = 3;
 
@@ -80,6 +96,15 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid url' });
   }
 
+  const cacheKey = raw;
+  const cached = getImgCache(cacheKey);
+  if (cached) {
+    res.setHeader('Content-Type', cached.type);
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('X-Cache', 'HIT');
+    return res.send(cached.buf);
+  }
+
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 10000);
   try {
@@ -125,6 +150,8 @@ module.exports = async function handler(req, res) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     res.setHeader('Cache-Control', 'public, max-age=86400');
+    setImgCache(cacheKey, buf, type || 'application/octet-stream');
+    res.setHeader('X-Cache', 'MISS');
     return res.status(200).send(buf);
   } catch (e) {
     if (e && e.code && Number.isInteger(e.code)) return res.status(e.code).json({ error: e.message });
