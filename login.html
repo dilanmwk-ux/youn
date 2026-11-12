@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Login — TempMail</title><script src="/theme.js"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet"><meta name="robots" content="noindex"><link rel="stylesheet" href="/site.css"></head><body><header class="site-head"><div class="container sh"><a class="lg" href="/"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg> TempMail</a><nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="/">Beranda</a><a href="/#cara">Cara pakai</a><a href="/#fitur">Fitur</a><a href="/#faq">FAQ</a><a href="/docs">API</a></nav></div></header>
+<main class="page"><div id="lg" class="lgin"><div class="cd login lgin-card">
+<div class="lgin-ico" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="21" width="30" height="21" rx="6"/><path class="shackle" d="M16 21v-5.5a8 8 0 0 1 16 0V21"/><circle cx="24" cy="31" r="2.6"/><path d="M24 33.6V37"/></svg></div>
+<h1>Masuk pengelola</h1>
+<p class="lgin-sub">Halaman ini khusus untuk pengelola TempMail.</p>
+<label for="pw">Password</label>
+<div class="pw-field"><input id="pw" type="password" autocomplete="current-password" placeholder="Masukkan password" autocapitalize="off" spellcheck="false"><button type="button" class="pw-eye" id="eye" aria-label="Tampilkan password" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/><path class="slash" d="M4 4l16 16"/></svg></button></div>
+<p class="caps" id="caps" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l7 8h-4v5H9v-5H5z"/><path d="M9 21h6"/></svg>Caps Lock aktif</p>
+<button class="bt lgin-go" id="go"><span class="go-lbl">Masuk</span><span class="spin" aria-hidden="true"></span></button>
+<p id="er" class="lgin-err" role="alert"></p>
+</div></div>
+<div id="db" hidden><div class="row sb"><h1>Ringkasan</h1><button class="bt g" id="out">Keluar</button></div>
+<div class="grid mt" id="tl"></div>
+<h2>Aktivitas per jenis</h2><div class="cd"><div id="ch" class="bars" role="img" aria-label="Grafik aktivitas"></div></div>
+<h2>API key</h2><div class="cd" id="ks"></div>
+<h2>Konfigurasi</h2><div class="cd" id="cf"></div>
+<h2>Kejadian terbaru</h2><div class="cd ev" id="ev"></div></div></main><script>
+const $=s=>document.querySelector(s);let tk=sessionStorage.tm_adm||'',tm;
+const E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function load(){try{const r=await fetch('/api/admin',{headers:{Authorization:'Bearer '+tk}});if(r.status===401||r.status===503){const j=await r.json();out(j.error);return}draw(await r.json())}catch{}}
+function out(m){tk='';sessionStorage.removeItem('tm_adm');clearInterval(tm);$('#db').hidden=true;$('#lg').hidden=false;$('#er').textContent=m||'';$('#pw').type='password';$('#eye').setAttribute('aria-pressed','false')}
+function draw(d){$('#lg').hidden=true;$('#db').hidden=false;const c=d.counters,sum=p=>Object.entries(c).filter(([k])=>k.startsWith(p)).reduce((a,[,v])=>a+v,0);
+const up=Math.round((Date.now()-d.since)/60000);
+$('#tl').innerHTML=[['Permintaan inbox',sum('gm:')],['Live stream',c.stream||0],['Panggilan API v1',sum('v1:')],['Kunci dibuat',Math.max(c.apikey||0,d.keys.length)],['Penyedia email',(d.upstream.ok?'OK ':'Down ')+d.upstream.ms+' ms'],['Instance aktif',up+' mnt']].map(([a,b])=>'<div class="cd"><div class="tg">'+a+'</div><div class="n">'+b+'</div></div>').join('');
+const rows=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,8),mx=Math.max(1,...rows.map(r=>r[1]));
+$('#ch').innerHTML=rows.map(r=>'<div><div class="bar-top"><span>'+E(r[0])+'</span><b>'+r[1]+'</b></div><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(1,r[1]/mx*100)+'%"></div></div></div>').join('')||'<p class="sm">Belum ada aktivitas</p>';
+const k=d.config,L=[['Penyimpanan permanen (Upstash)',d.persistent],['Captcha Turnstile',k.captcha],['Shield anti-bot',k.shield],['Blokir VPN/proxy',k.vpnBlock],['API key (API_SECRET)',k.apiKeys]];
+$('#cf').innerHTML=L.map(([a,b])=>'<div><span class="dot '+(b?'y':'x')+'"></span>'+a+' — '+(b?'aktif':'mati')+'</div>').join('')+(d.kv&&d.kv.ok?'<p class="sm">Redis terhubung. Kunci &amp; angka tersimpan permanen.</p>':'<p class="sm err">Redis TIDAK tersambung: '+E((d.kv&&d.kv.err)||'env belum diisi')+'. Selama ini merah, kunci &amp; angka tidak akan tercatat.</p>');
+$('#ks').innerHTML=d.keys.length?'<div class="tw"><table>'+d.keys.map(x=>{const rv=d.revoked.includes(x.i);return '<tr><td><code>'+E(x.i)+'</code></td><td>'+E(x.n)+'</td><td>'+new Date(x.t).toLocaleDateString('id-ID')+'</td><td>'+(rv?'dicabut':'<button class="bt s" data-rv="'+E(x.i)+'">Cabut</button>')+'</td></tr>'}).join('')+'</table></div>':'Belum ada kunci tercatat.';
+$('#ev').innerHTML=d.events.map(e=>'<div>'+new Date(e.t).toLocaleTimeString('id-ID')+' · '+E(e.k)+' '+E(e.m)+'</div>').join('')||'Belum ada.'}
+function fail(m){$('#er').textContent=m;const c=$('.lgin-card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');$('#pw').focus()}
+$('#go').onclick=async()=>{const b=$('#go');$('#er').textContent='';if(!$('#pw').value)return fail('Masukkan password dulu');b.classList.add('loading');b.disabled=true;try{const r=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('#pw').value})});const j=await r.json();if(!r.ok)return fail(j.error||'Password salah');tk=j.token;sessionStorage.tm_adm=tk;$('#pw').value='';load();start()}catch{fail('Gagal terhubung. Periksa koneksi lalu coba lagi.')}finally{b.classList.remove('loading');b.disabled=false}};
+$('#eye').onclick=()=>{const p=$('#pw'),e=$('#eye'),show=p.type==='password';p.type=show?'text':'password';e.setAttribute('aria-pressed',show);e.setAttribute('aria-label',show?'Sembunyikan password':'Tampilkan password');p.focus()};
+const capsChk=e=>{if(e.getModifierState)$('#caps').hidden=!e.getModifierState('CapsLock')};
+$('#pw').addEventListener('keydown',capsChk);$('#pw').addEventListener('keyup',capsChk);$('#pw').addEventListener('blur',()=>{$('#caps').hidden=true});
+const post=(r,b)=>fetch('/api/admin?r='+r,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tk},body:JSON.stringify(b)}).then(x=>x.json());
+document.addEventListener('click',async e=>{const t=e.target;if(t.dataset.rv){await post('revoke',{i:t.dataset.rv});load()}});
+$('#pw').onkeydown=e=>{if(e.key==='Enter')$('#go').click()};$('#out').onclick=()=>out('');
+function start(){clearInterval(tm);tm=setInterval(()=>{if(!document.hidden)load()},10000)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tk)load()});
+if(tk){load();start()}
+</script><script src="/micro.js" defer></script></body></html>
