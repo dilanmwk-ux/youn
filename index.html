@@ -19,6 +19,11 @@
     <header class="site-head"><div class="container sh">
       <a class="lg" href="/"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
       <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#cara" data-i18n="navHow">Cara pakai</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
+      <div class="sh-act">
+        <button type="button" class="icon-btn menu-trigger" id="btnSettings" aria-label="Menu" aria-haspopup="dialog" data-i18n-aria="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
     </div></header>
 
     <main>
@@ -152,14 +157,7 @@
       </div>
     </div>
   </div>
-
-  
-  <button type="button" class="float-pill" id="btnSettings" aria-label="Menu" aria-haspopup="dialog" data-i18n-aria="settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    <span data-i18n="settings">Menu</span>
-  </button>
-
-  <div class="dr" id="settingsBackdrop" hidden>
+<div class="dr" id="settingsBackdrop" hidden>
     <div class="dr-panel" role="dialog" aria-modal="true" aria-label="Menu" data-i18n-aria="settings">
       <div class="dr-bar">
         <a class="dr-brand" href="/"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
@@ -553,6 +551,19 @@ function showBlock(reason) {
 }
 $('#blockRetry').addEventListener('click', () => location.reload());
 
+
+/* Simple short-lived request cache for API calls */
+const apiCache = new Map();
+function getCached(key, ttl = 2500) {
+  const hit = apiCache.get(key);
+  if (hit && Date.now() - hit.t < ttl) return hit.v;
+  return null;
+}
+function setCached(key, v) {
+  apiCache.set(key, { v, t: Date.now() });
+  if (apiCache.size > 40) apiCache.delete(apiCache.keys().next().value);
+}
+
 async function fetchJson(url, ms = 12000, headers = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
@@ -796,13 +807,20 @@ function proxyUrl(u) {
 async function gm(params) {
   const q = new URLSearchParams(params);
   if (state.sid) q.set('sid_token', state.sid);
-  const call = () => fetchJson(`/api/gm?${q}`, 12000, { 'x-tm-token': getTok() });
+  const key = q.toString();
+  const cached = getCached(key, params.f === 'check_email' ? 1800 : 4000);
+  if (cached) return cached;
+  const call = () => fetchJson(`/api/gm?${q}`, 10000, { 'x-tm-token': getTok() });
   try {
-    return await call();
+    const res = await call();
+    setCached(key, res);
+    return res;
   } catch (e) {
     if (!e.captcha) throw e;
     await ensureCaptcha(true);
-    return await call();
+    const res = await call();
+    setCached(key, res);
+    return res;
   }
 }
 
@@ -1347,14 +1365,14 @@ document.addEventListener('keydown', (e) => {
 function openSettings() {
   settingsBackdrop.hidden = false;
   requestAnimationFrame(() => settingsBackdrop.classList.add('open'));
-  const pill = document.getElementById('btnSettings');
-  if (pill) pill.classList.add('open');
+  const btn = document.getElementById('btnSettings');
+  if (btn) btn.classList.add('open');
 }
 
 function closeSettings() {
   settingsBackdrop.classList.remove('open');
-  const pill = document.getElementById('btnSettings');
-  if (pill) pill.classList.remove('open');
+  const btn = document.getElementById('btnSettings');
+  if (btn) btn.classList.remove('open');
   setTimeout(() => {
     settingsBackdrop.hidden = true;
   }, 220);
@@ -1424,7 +1442,7 @@ applyLang();
       save();msgCount.textContent=String(state.messages.length);inboxSig=null;renderInbox();
     });
   }
-  setInterval(function(){if(!state.sid&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},3000);
+  setInterval(function(){if(!state.sid&&es){es.close();es=null;cur=null;b.classList.remove('on')}else open()},2500);
 })();
 </script>
 <script src="/micro.js" defer></script></body>
