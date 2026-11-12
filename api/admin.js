@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const stats = require('./_stats');
 const kv = require('./_kv');
+const prov = require('./_providers');
 const { rate, getIp } = require('./_shield');
 
 const sec = () => (process.env.API_SECRET || process.env.ADMIN_PASSWORD || '') + '|adm';
@@ -35,16 +36,14 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Permintaan tidak dikenal' });
   }
 
-  const t0 = Date.now();
-  let up = { ok: false, ms: 0 };
-  try {
-    const r = await fetch('https://api.guerrillamail.com/ajax.php?f=get_email_address&ip=127.0.0.1&agent=health', { signal: AbortSignal.timeout(4000) });
-    up = { ok: r.ok, ms: Date.now() - t0 };
-  } catch { up.ms = Date.now() - t0; }
+  const hp = await prov.health();
+  const gmp = hp.find((x) => x.id === 'gm') || { ok: false, ms: 0 };
+  const up = { ok: gmp.ok, ms: gmp.ms };
 
   const st = stats.get();
   return res.status(200).json({
     since: st.since, counters: { ...st.c, ...((await kv.counters()) || {}) }, persistent: kv.on(), kv: await kv.status(),
+    providers: hp, providerCount: hp.length, providerOk: hp.filter((x) => x.ok).length,
     keys: (await kv.get('keys')) || [], revoked: (await kv.get('revoked')) || [], events: st.ev, upstream: up,
     config: {
       captcha: !!process.env.TURNSTILE_SECRET_KEY,
