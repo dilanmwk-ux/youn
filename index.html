@@ -30,6 +30,11 @@
       <section class="container intro">
         <h1 data-i18n="heroTitle">Email sementara, siap dipakai.</h1>
         <p class="lead" data-i18n="heroDesc">Salin alamat di bawah, pakai untuk mendaftar, lalu baca emailnya di kotak masuk. Tanpa akun.</p>
+        <div class="benefits">
+          <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Instant</div>
+          <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Privat & Aman</div>
+          <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Gratis Selamanya</div>
+        </div>
       </section>
 
       <section class="container" id="inbox">
@@ -102,6 +107,21 @@
           <article class="fc"><h3 data-i18n="f4_t">Isi email aman dibuka</h3><p data-i18n="f4_d">Email tampil dalam bingkai terisolasi, jadi skrip dari pengirim tidak dijalankan.</p></article>
           <article class="fc"><h3 data-i18n="f5_t">API untuk developer</h3><p data-i18n="f5_d">REST + JSON dengan API key. Cocok untuk skrip, bot, dan tes otomatis.</p></article>
           <article class="fc"><h3 data-i18n="f6_t">Bahasa Indonesia &amp; English</h3><p data-i18n="f6_d">Ganti bahasa kapan saja lewat menu. Pilihanmu diingat di perangkat ini.</p></article>
+        </div>
+      </section>
+
+      <section class="container sec" id="use-cases">
+        <h2>Cocok dipakai untuk</h2>
+        <p class="sec-lead">TempMail membantu menjaga privasi saat mencoba layanan baru atau mendaftar tanpa khawatir spam.</p>
+        <div class="use-cases">
+          <article class="use-card"><h4>📝 Daftar akun baru</h4><p>Coba aplikasi atau website tanpa memberi email utama.</p></article>
+          <article class="use-card"><h4>🧪 Testing & Development</h4><p>Sempurna untuk developer yang butuh email cepat saat testing.</p></article>
+          <article class="use-card"><h4>🛍️ Promo & Newsletter</h4><p>Ambil kode promo tanpa inbox utama penuh spam.</p></article>
+          <article class="use-card"><h4>🔒 Privasi ekstra</h4><p>Jaga email asli tetap bersih dan aman dari kebocoran data.</p></article>
+        </div>
+        <div class="privacy-note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Pesan hanya disimpan sementara. Jangan gunakan untuk akun penting atau data sensitif.</span>
         </div>
       </section>
 
@@ -790,9 +810,9 @@ function ensureCaptcha(force = false) {
   if (gatePromise) return gatePromise;
   gatePromise = (async () => {
     const cfg = await fetchJson('/api/verify');
-    if (!cfg.enabled) return; // captcha dimatikan di server
+    // Captcha sekarang selalu wajib
     store.del(TOKEN_KEY); memTok = null;
-    await showGate(cfg.siteKey, !!cfg.fallback);
+    await showGate(cfg.siteKey || '1x00000000000000000000AA', !!cfg.fallback);
   })().finally(() => { gatePromise = null; });
   return gatePromise;
 }
