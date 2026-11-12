@@ -1,6 +1,16 @@
 const MT_BASE = 'https://mtempmail.com/api';
 const mtKey = () => (process.env.MTEMPMAIL_KEY || 'pub_nRn1hUwpdmZvxQNVWDfoXgKyF7dIm9nRIIIt1qDw').trim();
-const UA = 'Mozilla/5.0 (compatible; TempMail/1.0)';
+const UA = 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36';
+const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
+const SEP = '|'; // sid_token mTempMail = "alamat|email_token"
+
+// sid_token mTempMail berisi alamat + token mailbox dari mtempmail.com.
+// Token itu dibutuhkan agar inbox boleh dibaca (tanpanya muncul "You are not authorized").
+function parseSid(v) {
+  const s = String(v || '');
+  const i = s.lastIndexOf(SEP);
+  return i > 0 ? { email: s.slice(0, i), tok: s.slice(i + 1) } : { email: s, tok: '' };
+}
 
 const LIST = [
   { id: 'gm', name: 'Guerrilla Mail', site: 'guerrillamail.com', custom: true, live: true },
@@ -64,42 +74,74 @@ function normMsg(m) {
   };
 }
 
-async function mtJson(path, opts = {}, ms = 10000) {
-  const r = await fetch(MT_BASE + path, {
-    ...opts,
-    headers: { Accept: 'application/json', 'User-Agent': UA, ...(opts.headers || {}) },
-    signal: AbortSignal.timeout(ms),
-  });
-  const text = await r.text();
-  let j = null;
-  try { j = JSON.parse(text); } catch { /* bukan JSON */ }
-  if (!r.ok) {
-    const e = new Error((j && (j.message || j.error)) || 'mTempMail HTTP ' + r.status);
-    e.code = r.status;
-    throw e;
+const isAuthMsg = (m) => /not\s+authori[sz]ed|unauthori[sz]ed|forbidden|invalid\s+token/i.test(String(m || ''));
+
+// ctx = { ip, tok } : IP klien + token mailbox diteruskan ke mTempMail
+async function mtJson(path, opts = {}, ms = 10000, ctx = {}) {
+  const headers = { Accept: 'application/json', 'User-Agent': UA, Origin: 'https://mtempmail.com', Referer: 'https://mtempmail.com/', ...(opts.headers || {}) };
+  if (ctx.ip) { headers['X-Forwarded-For'] = ctx.ip; headers['X-Real-IP'] = ctx.ip; }
+  if (ctx.tok) { headers.Authorization = 'Bearer ' + ctx.tok; headers['X-Email-Token'] = ctx.tok; }
+  let url = MT_BASE + path;
+  if (ctx.tok && !opts.method) url += (url.includes('?') ? '&' : '?') + 'email_token=' + encodeURIComponent(ctx.tok);
+
+  let last = null;
+  for (let attempt = 0; attempt < 2; attempt++) { // 1x ulang untuk gangguan jaringan / 5xx
+    try {
+      const r = await fetch(url, { ...opts, headers, signal: AbortSignal.timeout(ms) });
+      const text = await r.text();
+      let j = null;
+      try { j = JSON.parse(text); } catch { /* bukan JSON */ }
+      const msg = (j && (j.message || j.error)) || '';
+      if (!r.ok) {
+        const e = new Error(msg || 'mTempMail HTTP ' + r.status);
+        e.code = r.status;
+        e.auth = r.status === 401 || r.status === 403 || isAuthMsg(msg);
+        if (r.status >= 500 && attempt === 0) { last = e; await sleep(350); continue; }
+        throw e;
+      }
+      if (j === null) throw Object.assign(new Error('mTempMail membalas bukan JSON'), { code: 502 });
+      if (j.status === false) {
+        const e = new Error(msg || 'mTempMail menolak permintaan');
+        e.code = isAuthMsg(msg) ? 401 : 502;
+        e.auth = isAuthMsg(msg);
+        throw e;
+      }
+      return j;
+    } catch (e) {
+      if (e.code) throw e; // error dari server mTempMail: jangan diulang
+      last = e;            // timeout / jaringan: ulang sekali
+      if (attempt === 0) await sleep(350);
+    }
   }
-  if (j === null) throw Object.assign(new Error('mTempMail membalas bukan JSON'), { code: 502 });
-  if (j.status === false) throw Object.assign(new Error(j.message || j.error || 'mTempMail menolak permintaan'), { code: 502 });
-  return j;
+  throw Object.assign(new Error((last && last.message) || 'mTempMail tidak merespons'), { code: 502 });
 }
 
 /* ---------- aksi mTempMail (bentuk keluaran = Guerrilla) ---------- */
 const mt = {
-  async create() {
-    const j = await mtJson('/emails/' + encodeURIComponent(mtKey()), { method: 'POST' });
+  async create(ip) {
+    const j = await mtJson('/emails/' + encodeURIComponent(mtKey()), { method: 'POST' }, 10000, { ip });
     const d = j.data || j;
     const email = d.email || d.address;
     if (!email || !String(email).includes('@')) throw Object.assign(new Error('mTempMail tidak memberi alamat'), { code: 502 });
-    return { email_addr: String(email), sid_token: String(email), site: 'mtempmail.com', expire_at: d.expire_at || null };
+    const tok = d.email_token || d.token || '';
+    return {
+      email_addr: String(email),
+      sid_token: tok ? String(email) + SEP + String(tok) : String(email),
+      site: 'mtempmail.com',
+      expire_at: d.expire_at || null,
+    };
   },
-  async inbox(email) {
-    const j = await mtJson('/messages/' + encodeURIComponent(mtKey()) + '/' + encodeURIComponent(email));
+  async inbox(sid, ip) {
+    const { email, tok } = parseSid(sid);
+    const j = await mtJson('/messages/' + encodeURIComponent(mtKey()) + '/' + encodeURIComponent(email), {}, 10000, { ip, tok });
     const list = findArray(j).map(normMsg).filter((m) => m.mail_id && m.mail_id !== 'undefined');
     list.forEach((m) => { m.mail_body = ''; }); // daftar tidak perlu isi penuh
     return { list, count: String(list.length), email, seq: 0 };
   },
-  async read(email, id) {
-    const j = await mtJson('/messages/' + encodeURIComponent(mtKey()) + '/' + encodeURIComponent(email));
+  async read(sid, id, ip) {
+    const { email, tok } = parseSid(sid);
+    const ctx = { ip, tok };
+    const j = await mtJson('/messages/' + encodeURIComponent(mtKey()) + '/' + encodeURIComponent(email), {}, 10000, ctx);
     const raw = findArray(j).find((m) => String(pickFirst(m, ['id', 'message_id', 'uuid', 'mail_id', 'messageId', 'uid'])) === String(id));
     if (!raw) throw Object.assign(new Error('Pesan tidak ditemukan (mungkin sudah kedaluwarsa)'), { code: 404 });
     let msg = normMsg(raw);
@@ -111,8 +153,9 @@ const mt = {
       ];
       for (const p of tries) {
         try {
-          const d = await mtJson(p, {}, 6000);
-          const one = Array.isArray(findArray(d)) && findArray(d).length ? findArray(d)[0] : d.data || d;
+          const d = await mtJson(p, {}, 6000, ctx);
+          const arr = findArray(d);
+          const one = arr.length ? arr[0] : d.data || d;
           const n = normMsg({ ...raw, ...one });
           if (n.mail_body) { msg = n; break; }
         } catch { /* lanjut */ }
@@ -121,9 +164,10 @@ const mt = {
     if (!msg.mail_body) msg.mail_body = msg.mail_excerpt;
     return msg;
   },
-  async del(email, id) {
+  async del(sid, id, ip) {
+    const { email, tok } = parseSid(sid);
     const p = '/messages/' + encodeURIComponent(mtKey()) + '/' + encodeURIComponent(email) + '/' + encodeURIComponent(id);
-    try { await mtJson(p, { method: 'DELETE' }, 6000); return { deleted_ids: [String(id)], remote: true }; }
+    try { await mtJson(p, { method: 'DELETE' }, 6000, { ip, tok }); return { deleted_ids: [String(id)], remote: true }; }
     catch { return { deleted_ids: [String(id)], remote: false }; } // frontend menyembunyikan lokal
   },
   async domains() {
@@ -155,4 +199,4 @@ async function health() {
   }));
 }
 
-module.exports = { LIST, ids, has, mt, health, normMsg, findArray };
+module.exports = { LIST, ids, has, mt, health, normMsg, findArray, parseSid };
