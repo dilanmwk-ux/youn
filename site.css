@@ -1,6 +1,3 @@
-/* TempMail — satu stylesheet untuk semua halaman.
-   Tema "surat udara": biru tinta #0e1747 · biru pos #2347e6 · merah pos #e5483b · kertas #ffffff · latar #eef0f7
-   Font: Bricolage Grotesque (judul, alamat, tombol) + Hanken Grotesk (teks). Garis serong merah-biru = tanda khas amplop pos udara. */
 :root{
   color-scheme:light;
   --bg:#eef0f7;--navy:#0e1747;--navy2:#1a2562;--panel:#fff;--raise:#f3f4fa;--raise2:#e4e8f6;
@@ -416,3 +413,38 @@ th{font:650 13px var(--d);color:var(--mut);background:var(--raise)}
   .toast{max-width:92vw}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* ---------- Perapian tampilan (override) ---------- */
+/* Tombol aksi: teks tidak pecah jadi dua baris, ikon + label tetap sebaris */
+.act{white-space:nowrap;font-size:15px}
+.act-row{gap:8px}
+@media (max-width:380px){.act{padding:0 8px;gap:6px;font-size:14px}}
+
+/* Alamat email: lebih kontras, nama pengguna & domain satu kesatuan */
+.address-box{min-height:76px;padding:14px 16px;background:var(--raise);box-shadow:inset 0 0 0 1px var(--line)}
+#emailAddress{letter-spacing:-.02em;line-height:1.3}
+#emailAddress .d{color:var(--mut)}
+
+/* Kartu utama: sedikit lebih lega di layar kecil */
+@media (max-width:640px){
+  .addr-pane{padding:18px 16px;gap:12px}
+  .intro{padding-top:28px;padding-bottom:26px}
+  .lead{font-size:16px}
+}
+
+/* Footer: jarak atas/bawah, tautan sejajar dengan logo, aman di area gesture */
+.site-foot{margin-top:48px}
+.site-foot .sf{padding-top:36px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));gap:18px}
+.site-foot nav{gap:4px 6px;margin-left:-10px}
+.site-foot nav a{padding:8px 10px;border-radius:6px;transition:color .18s,background-color .18s}
+.site-foot nav a:hover{background:rgba(255,255,255,.08)}
+.site-foot .sf-d{margin-top:6px}
+
+/* Status inbox: titik "Live" dan pesan kosong lebih rapi */
+.live-dot{flex:none}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Pita biru: selalu berakhir 44px di bawah tepi atas kartu (tidak lagi memotong kartu di tengah) */
+main:has(.intro)::before{display:none}
+.intro{position:relative}
+.intro::before{content:"";position:absolute;z-index:-1;top:0;bottom:-44px;left:50%;width:100vw;transform:translateX(-50%);background:var(--navy)}
