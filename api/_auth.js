@@ -2,9 +2,10 @@ const crypto = require('crypto');
 
 const TTL_MS = 12 * 60 * 60 * 1000;
 
-// Captcha aktif hanya jika TURNSTILE_SECRET_KEY diisi di Vercel
-const enabled = () => !!process.env.TURNSTILE_SECRET_KEY;
-const secret = () => process.env.SESSION_SECRET || process.env.TURNSTILE_SECRET_KEY || '';
+// Captcha SELALU aktif. Pakai kunci asli kalau ada, kalau tidak pakai kunci test Cloudflare (selalu lolos).
+const TEST_SECRET = '1x0000000000000000000000000000000AA';
+const enabled = () => true;
+const secret = () => process.env.SESSION_SECRET || process.env.TURNSTILE_SECRET_KEY || TEST_SECRET;
 
 function sign(exp) {
   return crypto.createHmac('sha256', secret()).update(String(exp)).digest('base64url');
