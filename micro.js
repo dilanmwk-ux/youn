@@ -212,15 +212,22 @@
   var I = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
 
   if (!sb) {
-    // Buat Floating Pill untuk halaman lain (docs, login)
+    // Buat menu trigger di header untuk halaman lain
+    var shAct = document.querySelector('.sh-act');
+    if (!shAct) {
+      shAct = document.createElement('div');
+      shAct.className = 'sh-act';
+      var header = document.querySelector('.sh');
+      if (header) header.appendChild(shAct);
+    }
     trig = document.createElement('button');
     trig.type = 'button';
-    trig.className = 'float-pill';
+    trig.className = 'icon-btn menu-trigger';
     trig.id = 'btnSettings';
     trig.setAttribute('aria-label', 'Menu');
     trig.setAttribute('aria-haspopup', 'dialog');
-    trig.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span>';
-    document.body.appendChild(trig);
+    trig.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+    shAct.appendChild(trig);
     var cur = location.pathname.replace(/\/$/, '') || '/';
     var nav = [
       ['/', 'Beranda', '<path d="M4 11l8-7 8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h3.5v-5h3V20H17a1 1 0 0 0 1-1v-9"/>'],
