@@ -10,14 +10,14 @@
   <script src="/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   
 
 <link rel="stylesheet" href="/site.css"></head>
 <body>
   <div class="shell" id="top">
     <header class="site-head"><div class="container sh">
-      <a class="lg" href="/"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
+      <a class="lg" href="/"><svg class="brand-mark" width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="2" y="2" width="28" height="28" stroke="currentColor" stroke-width="3" stroke-dasharray="2.6 2.2"/><rect x="6" y="6" width="20" height="20" fill="currentColor"/><path d="M10.5 12.5h11V20h-11zM10.5 12.5l5.5 4.4 5.5-4.4" stroke-width="1.7" stroke-linejoin="round"/></svg>TempMail</a>
       <nav class="nvl" id="siteNav" aria-label="Menu utama"><a href="#top" data-i18n="navHome">Beranda</a><a href="#cara" data-i18n="navHow">Cara pakai</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
       <div class="sh-act">
         <button type="button" class="icon-btn menu-trigger" id="btnSettings" aria-label="Menu" aria-haspopup="dialog" data-i18n-aria="settings">
@@ -28,6 +28,14 @@
 
     <main>
       <section class="container intro">
+        <p class="kicker" data-i18n="heroTag">Email sementara · gratis</p>
+        <svg class="postmark" viewBox="0 0 160 160" aria-hidden="true">
+          <defs><path id="pmRing" d="M80 80m-58 0a58 58 0 1 1 116 0a58 58 0 1 1-116 0"/></defs>
+          <circle cx="80" cy="80" r="75" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <circle cx="80" cy="80" r="43" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor"><textPath href="#pmRing" textLength="356" lengthAdjust="spacing">TEMPMAIL · SEKALI PAKAI · TANPA DAFTAR ·</textPath></text>
+          <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M56 68q6-5 12 0t12 0t12 0t12 0"/><path d="M56 80q6-5 12 0t12 0t12 0t12 0"/><path d="M56 92q6-5 12 0t12 0t12 0t12 0"/></g>
+        </svg>
         <h1 data-i18n="heroTitle">Email sementara, siap dipakai.</h1>
         <p class="lead" data-i18n="heroDesc">Salin alamat di bawah, pakai untuk mendaftar, lalu baca emailnya di kotak masuk. Tanpa akun.</p>
       </section>
@@ -85,7 +93,7 @@
       </section>
 
       <section class="container sec" id="cara">
-        <h2 data-i18n="howTitle">Cara pakai</h2>
+        <div class="sec-h"><h2 data-i18n="howTitle">Cara pakai</h2></div>
         <ol class="steps">
           <li class="st"><span class="sn">1</span><h3 data-i18n="s1_t">Salin alamat</h3><p data-i18n="s1_d">Alamat dibuat otomatis saat halaman terbuka. Mau yang baru? Tekan Alamat baru.</p></li>
           <li class="st"><span class="sn">2</span><h3 data-i18n="s2_t">Pakai untuk mendaftar</h3><p data-i18n="s2_d">Tempel di formulir pendaftaran atau layanan lain yang tidak perlu tahu email aslimu.</p></li>
@@ -94,7 +102,7 @@
       </section>
 
       <section class="container sec" id="fitur">
-        <h2 data-i18n="featTitle">Yang kamu dapat</h2>
+        <div class="sec-h"><h2 data-i18n="featTitle">Yang kamu dapat</h2></div>
         <div class="fgrid">
           <article class="fc"><h3 data-i18n="f1_t">Tanpa akun</h3><p data-i18n="f1_d">Alamat langsung siap begitu halaman terbuka. Tidak ada formulir dan tidak ada password.</p></article>
           <article class="fc"><h3 data-i18n="f2_t">Kotak masuk otomatis</h3><p data-i18n="f2_d">Email baru muncul sendiri dalam hitungan detik. Biarkan tab terbuka saat mendaftar di layanan lain.</p></article>
@@ -106,8 +114,8 @@
       </section>
 
       <section class="container sec" id="use-cases">
-        <h2 data-i18n="useTitle">Cocok dipakai untuk</h2>
-        <p class="sec-lead" data-i18n="useLead">Pakai saat mencoba layanan baru, supaya email utamamu tidak ikut kebanjiran promosi.</p>
+        <div class="sec-h"><h2 data-i18n="useTitle">Cocok dipakai untuk</h2>
+        <p class="sec-lead" data-i18n="useLead">Pakai saat mencoba layanan baru, supaya email utamamu tidak ikut kebanjiran promosi.</p></div>
         <div class="use-cases">
           <article class="use-card"><h4 data-i18n="u1_t">Daftar akun baru</h4><p data-i18n="u1_d">Coba aplikasi atau situs tanpa memberikan email utama.</p></article>
           <article class="use-card"><h4 data-i18n="u2_t">Tes dan pengembangan</h4><p data-i18n="u2_d">Dapat kode verifikasi dengan cepat saat menguji alur pendaftaran.</p></article>
@@ -118,17 +126,24 @@
       </section>
 
       <section class="container sec" id="faq">
-        <h2 data-i18n="faqTitle">Pertanyaan umum</h2>
+        <div class="sec-h"><h2 data-i18n="faqTitle">Pertanyaan umum</h2></div>
         <div class="faq"><details class="fq"><summary data-i18n="q1_t">Apakah TempMail gratis?</summary><p data-i18n="q1_d">Ya, dipakai tanpa biaya dan tanpa akun.</p></details><details class="fq"><summary data-i18n="q2_t">Berapa lama pesan disimpan?</summary><p data-i18n="q2_d">Pesan hanya disimpan singkat. Jangan dipakai untuk data penting atau akun yang perlu kamu akses lagi.</p></details><details class="fq"><summary data-i18n="q3_t">Apakah aman untuk akun penting?</summary><p data-i18n="q3_d">Tidak disarankan. Alamat sementara bisa hilang, jadi pakai email tetap untuk bank, kerja, atau akun yang butuh pemulihan.</p></details><details class="fq"><summary data-i18n="q4_t">Kenapa ada verifikasi captcha?</summary><p data-i18n="q4_d">Untuk mencegah penyalahgunaan otomatis. Kalau captcha gagal, muat ulang halaman atau coba verifikasi alternatif.</p></details></div>
       </section>
 
-      <section class="container sec">
+      <section class="container sec sec-cta">
         <div class="cta-band">
           <div>
             <h2 data-i18n="ctaBandTitle">Butuh otomatisasi?</h2>
             <p data-i18n="ctaBandDesc">Buat kotak masuk sementara dari kode lewat REST API. API key dibuat langsung di halaman dokumentasi.</p>
+            <a class="hb" href="/docs" data-i18n="ctaApi">Lihat dokumentasi API</a>
           </div>
-          <a class="hb" href="/docs" data-i18n="ctaApi">Lihat dokumentasi API</a>
+          <pre class="cta-code" aria-label="curl"><span class="c">#</span> <span class="k">1.</span> alamat baru
+curl -H "x-api-key: tm_…" \
+  "/api/v1?a=new"
+
+<span class="c">#</span> <span class="k">2.</span> cek kotak masuk
+curl -H "x-api-key: tm_…" \
+  "/api/v1?a=inbox&amp;sid=SID&amp;seq=0"</pre>
         </div>
       </section>
     </main>
@@ -136,7 +151,7 @@
     <footer class="site-foot">
       <div class="container sf">
         <div>
-          <a class="lg" href="#top"><svg class="brand-mark" width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
+          <a class="lg" href="#top"><svg class="brand-mark" width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="2" y="2" width="28" height="28" stroke="currentColor" stroke-width="3" stroke-dasharray="2.6 2.2"/><rect x="6" y="6" width="20" height="20" fill="currentColor"/><path d="M10.5 12.5h11V20h-11zM10.5 12.5l5.5 4.4 5.5-4.4" stroke-width="1.7" stroke-linejoin="round"/></svg>TempMail</a>
           <p class="sf-d" data-i18n="footDesc">Email sementara yang cepat dan privat.</p>
         </div>
         <nav aria-label="Tautan"><a href="#cara" data-i18n="navHow">Cara pakai</a><a href="#fitur" data-i18n="navFeatures">Fitur</a><a href="#faq" data-i18n="navFaq">FAQ</a><a href="/docs">API</a></nav>
@@ -172,7 +187,7 @@
 <div class="dr" id="settingsBackdrop" hidden>
     <div class="dr-panel" role="dialog" aria-modal="true" aria-label="Menu" data-i18n-aria="settings">
       <div class="dr-bar">
-        <a class="dr-brand" href="/"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>
+        <a class="dr-brand" href="/"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="2" y="2" width="28" height="28" stroke="currentColor" stroke-width="3" stroke-dasharray="2.6 2.2"/><rect x="6" y="6" width="20" height="20" fill="currentColor"/><path d="M10.5 12.5h11V20h-11zM10.5 12.5l5.5 4.4 5.5-4.4" stroke-width="1.7" stroke-linejoin="round"/></svg>TempMail</a>
         <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup" data-i18n-aria="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="dr-body">
