@@ -1,5 +1,5 @@
 const auth = require('./_auth');
-const { shield } = require('./_shield');
+const { shield, getIp } = require('./_shield');
 const stats = require('./_stats');
 
 const ALLOWED_FN = new Set([
@@ -32,8 +32,7 @@ module.exports = async function handler(req, res) {
       if (typeof one === 'string' && one.length <= 200) q.append(k, one);
     }
   }
-  const fwd = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-  q.set('ip', fwd || '127.0.0.1');
+  q.set('ip', getIp(req) || '127.0.0.1');
   q.set('agent', String(req.headers['user-agent'] || 'Mozilla/5.0').slice(0, 200));
 
   const ctrl = new AbortController();
