@@ -242,7 +242,7 @@
     sb.className = 'dr'; sb.id = 'settingsBackdrop'; sb.hidden = true;
     sb.innerHTML =
       '<div class="dr-panel" role="dialog" aria-modal="true" aria-label="Menu">' +
-      '<div class="dr-bar"><a class="dr-brand" href="/"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="2"/><path d="M3 10l13 9 13-9"/></svg>TempMail</a>' +
+      '<div class="dr-bar"><a class="dr-brand" href="/"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="2" y="2" width="28" height="28" stroke="currentColor" stroke-width="3" stroke-dasharray="2.6 2.2"/><rect x="6" y="6" width="20" height="20" fill="currentColor"/><path d="M10.5 12.5h11V20h-11zM10.5 12.5l5.5 4.4 5.5-4.4" stroke-width="1.7" stroke-linejoin="round"/></svg>TempMail</a>' +
       '<button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
       '<div class="dr-body"><nav class="dr-nav" aria-label="Menu utama">' + nav + '</nav>' +
       '<div class="dr-sec"><div class="dr-label">Pengelola</div><a class="dr-link" href="/login">' + I('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>') + '<span>Masuk pengelola</span></a></div>' +
