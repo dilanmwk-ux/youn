@@ -474,3 +474,23 @@ th{font:600 11px var(--m);letter-spacing:.1em;text-transform:uppercase;color:var
 .lg svg path{stroke:var(--bg)}
 .dr-brand svg path{stroke:var(--panel)}
 .menu-trigger.open{background:var(--ink);color:var(--bg)}
+
+/* ---------- Menu hamburger: versi ringkas ---------- */
+.dr-panel{width:min(284px,calc(100vw - 32px))}
+.dr-body{flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:8px;padding:8px}
+.dr-nav,.dr-body>.dr-sec:first-of-type,.dr-dev{flex:0 0 100%}
+.dr-label{display:none}
+.dr-nav{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding-bottom:8px;border-bottom:1px dashed var(--line2)}
+.dr-nav a{min-height:40px;gap:10px;padding:0 8px;font-size:14px}
+.dr-nav a svg{width:18px;height:18px}
+.seg{margin:0;padding:3px}
+.seg button{padding:7px 6px;font-size:13px;gap:6px}
+.lang-opt .flag{width:19px;height:13px}
+.dr-sec:has(.dr-link){display:contents}
+.dr-sec .dr-link{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:4px;min-height:58px;padding:6px 4px;border:1.5px solid var(--line2);font:600 11.5px/1.2 var(--f);letter-spacing:0;text-align:center}
+.dr-sec .dr-link svg{width:19px;height:19px}
+.dr-sec .dr-link:hover{border-color:var(--edge)}
+.dr-dev{gap:10px;padding:8px 6px 0}
+.dr-avatar{width:30px;height:30px}
+.dr-name{font-size:14px}
+.dr-role{font-size:9.5px;padding:2px 6px}
