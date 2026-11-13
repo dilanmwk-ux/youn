@@ -10,7 +10,7 @@
   <script src="/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   
 
 <link rel="stylesheet" href="/site.css"></head>
@@ -30,11 +30,6 @@
       <section class="container intro">
         <h1 data-i18n="heroTitle">Email sementara, siap dipakai.</h1>
         <p class="lead" data-i18n="heroDesc">Salin alamat di bawah, pakai untuk mendaftar, lalu baca emailnya di kotak masuk. Tanpa akun.</p>
-        <div class="benefits">
-          <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Instant</div>
-          <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Privat & Aman</div>
-          <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Gratis Selamanya</div>
-        </div>
       </section>
 
       <section class="container" id="inbox">
@@ -111,18 +106,15 @@
       </section>
 
       <section class="container sec" id="use-cases">
-        <h2>Cocok dipakai untuk</h2>
-        <p class="sec-lead">TempMail membantu menjaga privasi saat mencoba layanan baru atau mendaftar tanpa khawatir spam.</p>
+        <h2 data-i18n="useTitle">Cocok dipakai untuk</h2>
+        <p class="sec-lead" data-i18n="useLead">Pakai saat mencoba layanan baru, supaya email utamamu tidak ikut kebanjiran promosi.</p>
         <div class="use-cases">
-          <article class="use-card"><h4>📝 Daftar akun baru</h4><p>Coba aplikasi atau website tanpa memberi email utama.</p></article>
-          <article class="use-card"><h4>🧪 Testing & Development</h4><p>Sempurna untuk developer yang butuh email cepat saat testing.</p></article>
-          <article class="use-card"><h4>🛍️ Promo & Newsletter</h4><p>Ambil kode promo tanpa inbox utama penuh spam.</p></article>
-          <article class="use-card"><h4>🔒 Privasi ekstra</h4><p>Jaga email asli tetap bersih dan aman dari kebocoran data.</p></article>
+          <article class="use-card"><h4 data-i18n="u1_t">Daftar akun baru</h4><p data-i18n="u1_d">Coba aplikasi atau situs tanpa memberikan email utama.</p></article>
+          <article class="use-card"><h4 data-i18n="u2_t">Tes dan pengembangan</h4><p data-i18n="u2_d">Dapat kode verifikasi dengan cepat saat menguji alur pendaftaran.</p></article>
+          <article class="use-card"><h4 data-i18n="u3_t">Kode promo dan newsletter</h4><p data-i18n="u3_d">Ambil kodenya, lalu biarkan sisa kiriman menumpuk di alamat sementara.</p></article>
+          <article class="use-card"><h4 data-i18n="u4_t">Menjaga email asli</h4><p data-i18n="u4_d">Email aslimu tidak ikut terbawa kalau layanan yang kamu coba bocor.</p></article>
         </div>
-        <div class="privacy-note">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Pesan hanya disimpan sementara. Jangan gunakan untuk akun penting atau data sensitif.</span>
-        </div>
+        <p class="privacy-note" data-i18n="privacyNote">Pesan hanya disimpan sementara. Jangan pakai untuk akun penting atau data sensitif.</p>
       </section>
 
       <section class="container sec" id="faq">
@@ -223,12 +215,12 @@
         <rect x="2" y="6" width="28" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
         <path d="M2 10l14 9 14-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <h2>Verifikasi dulu</h2>
-      <p>Selesaikan captcha untuk membuka TempMail.</p>
+      <h2 data-i18n="verifyTitle">Verifikasi dulu</h2>
+      <p data-i18n="verifyDesc">Selesaikan captcha untuk membuka TempMail.</p>
       <div id="cfBox"></div>
       <p class="gate-err" id="gateErr"></p>
-      <button type="button" class="btn-ghost" id="gatePow" hidden>Verifikasi alternatif</button>
-      <button type="button" class="btn-ghost" id="gateRetry" hidden>Coba lagi</button>
+      <button type="button" class="btn-ghost" id="gatePow" data-i18n="powAlt" hidden>Verifikasi alternatif</button>
+      <button type="button" class="btn-ghost" id="gateRetry" data-i18n="retry" hidden>Coba lagi</button>
     </div>
   </div>
 
@@ -238,9 +230,9 @@
         <path d="M16 3l11 4v8c0 7-4.6 11.6-11 14C9.6 26.6 5 22 5 15V7l11-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
         <path d="M11 11l10 10M21 11L11 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      <h2 id="blockTitle">Akses ditolak</h2>
+      <h2 id="blockTitle" data-i18n="accessDenied">Akses ditolak</h2>
       <p id="blockMsg"></p>
-      <button type="button" class="btn-ghost" id="blockRetry">Muat ulang</button>
+      <button type="button" class="btn-ghost" id="blockRetry" data-i18n="reload">Muat ulang</button>
     </div>
   </div>
 
@@ -348,6 +340,26 @@ const I18N = {
     accessDenied: 'Akses ditolak',
     customTitle: 'Pakai username sendiri',
     customHint: '3–20 karakter: huruf kecil, angka, titik, strip.',
+    useTitle: 'Cocok dipakai untuk',
+    useLead: 'Pakai saat mencoba layanan baru, supaya email utamamu tidak ikut kebanjiran promosi.',
+    u1_t: 'Daftar akun baru',
+    u1_d: 'Coba aplikasi atau situs tanpa memberikan email utama.',
+    u2_t: 'Tes dan pengembangan',
+    u2_d: 'Dapat kode verifikasi dengan cepat saat menguji alur pendaftaran.',
+    u3_t: 'Kode promo dan newsletter',
+    u3_d: 'Ambil kodenya, lalu biarkan sisa kiriman menumpuk di alamat sementara.',
+    u4_t: 'Menjaga email asli',
+    u4_d: 'Email aslimu tidak ikut terbawa kalau layanan yang kamu coba bocor.',
+    privacyNote: 'Pesan hanya disimpan sementara. Jangan pakai untuk akun penting atau data sensitif.',
+    powAlt: 'Verifikasi alternatif',
+    blockVpnT: 'VPN / proxy terdeteksi',
+    blockVpnM: 'Matikan VPN, proxy, atau DNS pribadi lalu muat ulang halaman ini.',
+    blockBotT: 'Trafik otomatis terdeteksi',
+    blockBotM: 'Permintaanmu terlihat seperti bot. Buka lewat browser atau aplikasi biasa.',
+    errSlow: 'Koneksi lambat, coba lagi',
+    errRate: 'Terlalu banyak permintaan, tunggu sebentar',
+    errVerify: 'Verifikasi diperlukan',
+    errDenied: 'Akses ditolak',
   },
   en: {
     navHome: 'Home',
@@ -447,6 +459,26 @@ const I18N = {
     accessDenied: 'Access denied',
     customTitle: 'Use your own username',
     customHint: '3–20 characters: lowercase letters, numbers, dot, dash.',
+    useTitle: 'Good for',
+    useLead: 'Use it when you try a new service, so your main inbox stays free of promotions.',
+    u1_t: 'New sign-ups',
+    u1_d: 'Try an app or site without handing over your main email.',
+    u2_t: 'Testing and development',
+    u2_d: 'Get verification codes fast while testing a sign-up flow.',
+    u3_t: 'Promo codes and newsletters',
+    u3_d: 'Grab the code, then let the rest pile up in a throwaway address.',
+    u4_t: 'Protecting your real email',
+    u4_d: 'Your real address stays out of it if a service you tried gets breached.',
+    privacyNote: 'Messages are stored only briefly. Do not use it for important accounts or sensitive data.',
+    powAlt: 'Alternative verification',
+    blockVpnT: 'VPN / proxy detected',
+    blockVpnM: 'Turn off your VPN, proxy, or private DNS, then reload this page.',
+    blockBotT: 'Automated traffic detected',
+    blockBotM: 'Your request looks like a bot. Open this in a regular browser or app.',
+    errSlow: 'Slow connection, try again',
+    errRate: 'Too many requests, wait a moment',
+    errVerify: 'Verification required',
+    errDenied: 'Access denied',
   },
 };
 
@@ -559,14 +591,10 @@ function esc(s) {
   return d.innerHTML;
 }
 
-const BLOCK_TEXT = {
-  vpn: ['VPN / proxy terdeteksi', 'Matikan VPN, proxy, atau DNS pribadi Anda lalu muat ulang halaman ini.'],
-  bot: ['Trafik otomatis terdeteksi', 'Permintaan Anda terlihat seperti bot. Buka lewat browser atau aplikasi biasa.'],
-};
 function showBlock(reason) {
-  const [t, m] = BLOCK_TEXT[reason] || BLOCK_TEXT.bot;
-  $('#blockTitle').textContent = t;
-  $('#blockMsg').textContent = m;
+  const k = reason === 'vpn' ? 'Vpn' : 'Bot';
+  $('#blockTitle').textContent = t('block' + k + 'T');
+  $('#blockMsg').textContent = t('block' + k + 'M');
   $('#blockScr').hidden = false;
 }
 $('#blockRetry').addEventListener('click', () => location.reload());
@@ -594,25 +622,25 @@ async function fetchJson(url, ms = 12000, headers = {}) {
       const j = await res.json().catch(() => ({}));
       if (j.error === 'blocked') {
         showBlock(j.reason);
-        const err = new Error('Akses ditolak');
+        const err = new Error(t('errDenied'));
         err.blocked = true;
         throw err;
       }
     }
     if (res.status === 429) {
-      const err = new Error('Terlalu banyak permintaan, tunggu sebentar');
+      const err = new Error(t('errRate'));
       err.rate = true;
       throw err;
     }
     if (res.status === 401) {
-      const err = new Error('Verifikasi diperlukan');
+      const err = new Error(t('errVerify'));
       err.captcha = true;
       throw err;
     }
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.json();
   } catch (e) {
-    if (e.name === 'AbortError') throw new Error('Koneksi lambat, coba lagi');
+    if (e.name === 'AbortError') throw new Error(t('errSlow'));
     throw e;
   } finally {
     clearTimeout(t);
@@ -828,18 +856,19 @@ async function gm(params) {
   const q = new URLSearchParams(params);
   if (state.sid) q.set('sid_token', state.sid);
   const key = q.toString();
-  const cached = getCached(key, params.f === 'check_email' ? 1800 : 4000);
+  const cacheable = params.f === 'check_email' || params.f === 'fetch_email';
+  const cached = cacheable ? getCached(key, params.f === 'check_email' ? 1800 : 4000) : null;
   if (cached) return cached;
   const call = () => fetchJson(`/api/gm?${q}`, 10000, { 'x-tm-token': getTok() });
   try {
     const res = await call();
-    setCached(key, res);
+    if (cacheable) setCached(key, res);
     return res;
   } catch (e) {
     if (!e.captcha) throw e;
     await ensureCaptcha(true);
     const res = await call();
-    setCached(key, res);
+    if (cacheable) setCached(key, res);
     return res;
   }
 }
