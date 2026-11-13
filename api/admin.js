@@ -21,7 +21,8 @@ module.exports = async function handler(req, res) {
   }
 
   const [e, s] = String(req.headers.authorization || '').replace(/^Bearer /, '').split('.');
-  if (!e || !s || Number(e) < Date.now() || s !== sg(e)) return res.status(401).json({ error: 'Sesi habis' });
+  const okSig = !!s && !!e && (() => { const a = Buffer.from(s), b = Buffer.from(sg(e)); return a.length === b.length && crypto.timingSafeEqual(a, b); })();
+  if (!okSig || !(Number(e) >= Date.now())) return res.status(401).json({ error: 'Sesi habis' });
 
   if (req.method === 'POST') {
     let b = req.body;
