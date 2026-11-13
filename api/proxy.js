@@ -100,7 +100,9 @@ module.exports = async function handler(req, res) {
   const cached = getImgCache(cacheKey);
   if (cached) {
     res.setHeader('Content-Type', cached.type);
-    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    res.setHeader('Cache-Control', 'private, max-age=300');
     res.setHeader('X-Cache', 'HIT');
     return res.send(cached.buf);
   }
@@ -149,8 +151,8 @@ module.exports = async function handler(req, res) {
     res.setHeader('Content-Type', contentType.split(';')[0]);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    setImgCache(cacheKey, buf, type || 'application/octet-stream');
+    res.setHeader('Cache-Control', 'private, max-age=86400');
+    setImgCache(cacheKey, buf, contentType.split(';')[0]);
     res.setHeader('X-Cache', 'MISS');
     return res.status(200).send(buf);
   } catch (e) {
