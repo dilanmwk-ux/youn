@@ -506,3 +506,15 @@ th{font:600 11px var(--m);letter-spacing:.1em;text-transform:uppercase;color:var
 .cap.bad .cap-st{color:var(--err)}
 .cap-alt{width:100%;margin-top:10px}
 @media (max-width:400px){.cap #cfBox{transform:scale(.88);transform-origin:center top;margin-bottom:-8px}}
+
+/* ---------- Menu: Tentang (isi: developer, email, telegram) ---------- */
+.dr-abt{width:100%;border:0;background:transparent;text-align:left;cursor:pointer}
+.dr-abt span{flex:1}
+.dr-abt .dr-chev{width:16px;height:16px;margin-left:auto;transition:transform .3s var(--ease-spring)}
+.dr-abt[aria-expanded=true] .dr-chev{transform:rotate(180deg)}
+.dr-abt[aria-expanded=true]{background:var(--raise)}
+.dr-abt-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease-out)}
+.dr-abt-body>div{min-height:0;overflow:hidden;visibility:hidden;display:flex;flex-direction:column;gap:2px;margin-left:19px;padding-left:10px;border-left:1.5px dashed var(--line2);transition:visibility 0s .3s}
+.dr-abt-body.open{grid-template-rows:1fr}
+.dr-abt-body.open>div{visibility:visible;transition-delay:0s}
+.dr-abt-body .dr-dev{border-top:0;padding:10px 10px 6px}
