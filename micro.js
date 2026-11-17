@@ -246,11 +246,11 @@
       '<button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
       '<div class="dr-body"><nav class="dr-nav" aria-label="Menu utama">' + nav + '</nav>' +
       '<div class="dr-sec"><div class="dr-label">Pengelola</div><a class="dr-link" href="/login">' + I('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>') + '<span>Masuk pengelola</span></a></div>' +
-      '<div class="dr-sec"><div class="dr-label">Kontak</div>' +
+      '<div class="dr-sec dr-about"><button type="button" class="dr-link dr-abt" id="drAbtBtn" aria-expanded="false" aria-controls="drAbout">' + I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8v.01"/>') + '<span>Tentang</span>' + I('<path d="M6 9l6 6 6-6"/>').replace('<svg ', '<svg class="dr-chev" ') + '</button>' +
+      '<div class="dr-abt-body" id="drAbout"><div><div class="dr-dev"><img class="dr-avatar" src="/dev.jpg" width="42" height="42" alt=""><div><div class="dr-name">JarZz <span class="dr-role">Developer</span></div></div></div>' +
       '<a class="dr-link" href="mailto:muhammadfajar4p@gmail.com">' + I('<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/>') + '<span>Email</span></a>' +
-      '<a class="dr-link" href="https://t.me/amurax" target="_blank" rel="noopener noreferrer">' + I('<path d="M21 4L3 11l6 2.2L11.5 20l3-4.2L19 19.5z"/><path d="M9 13.2L21 4"/>') + '<span>Telegram</span></a></div>' +
-      '<div class="dr-dev"><img class="dr-avatar" src="/dev.jpg" width="42" height="42" alt=""><div><div class="dr-name">JarZz <span class="dr-role">Developer</span></div>' +
-      '</div></div></div></div>';
+      '<a class="dr-link" href="https://t.me/amurax" target="_blank" rel="noopener noreferrer">' + I('<path d="M21 4L3 11l6 2.2L11.5 20l3-4.2L19 19.5z"/><path d="M9 13.2L21 4"/>') + '<span>Telegram</span></a></div></div></div>' +
+      '</div></div></div>';
     document.body.appendChild(sb);
     var closeBtn = sb.querySelector('#btnCloseSettings');
     var openD = function () {
@@ -270,6 +270,19 @@
     sb.addEventListener('click', function (e) { if (e.target === sb) closeD(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sb.classList.contains('open')) closeD(); });
   }
+
+  /* Tentang: buka/tutup isi (developer, email, telegram); menutup sendiri saat menu ditutup */
+  (function () {
+    var btn = sb.querySelector('#drAbtBtn'), body = sb.querySelector('#drAbout');
+    if (!btn || !body) return;
+    function set(on) {
+      btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      body.classList.toggle('open', on);
+      if (on) setTimeout(function () { try { body.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }, 220);
+    }
+    btn.addEventListener('click', function () { set(btn.getAttribute('aria-expanded') !== 'true'); });
+    new MutationObserver(function () { if (!sb.classList.contains('open')) set(false); }).observe(sb, { attributes: true, attributeFilter: ['class', 'hidden'] });
+  })();
 
   function close() {
     if (onIndex) { if (typeof closeSettings === 'function') closeSettings(); }
