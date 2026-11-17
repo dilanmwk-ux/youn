@@ -493,3 +493,16 @@ th{font:600 11px var(--m);letter-spacing:.1em;text-transform:uppercase;color:var
 .dr-avatar{width:24px;height:24px}
 .dr-name{font-size:13px}
 .dr-role{font-size:9px;padding:2px 5px}
+
+/* ---------- Captcha di halaman login ---------- */
+.cap{margin-top:16px}
+.cap-box{display:flex;justify-content:center;overflow:hidden;border-radius:var(--r-s)}
+.cap #cfBox{min-height:65px;display:flex;justify-content:center;margin:0}
+.cap-st{display:flex;align-items:center;gap:7px;margin:8px 0 0;font:500 12.5px/1.4 var(--m);color:var(--mut);max-width:none}
+.cap-ok{display:none;flex:none}
+.cap.ok .cap-st{color:var(--ok)}
+.cap.ok .cap-ok{display:block}
+.cap.ok .cap-box{display:none}
+.cap.bad .cap-st{color:var(--err)}
+.cap-alt{width:100%;margin-top:10px}
+@media (max-width:400px){.cap #cfBox{transform:scale(.88);transform-origin:center top;margin-bottom:-8px}}
