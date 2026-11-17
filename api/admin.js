@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const stats = require('./_stats');
 const kv = require('./_kv');
 const { rate, getIp } = require('./_shield');
+const auth = require('./_auth');
 
 const sec = () => (process.env.API_SECRET || process.env.ADMIN_PASSWORD || '') + '|adm';
 const sg = (e) => crypto.createHmac('sha256', sec()).update(String(e)).digest('base64url');
@@ -15,6 +16,7 @@ module.exports = async function handler(req, res) {
     if (!rate('adm:' + getIp(req), 8, 600000)) return res.status(429).json({ error: 'Terlalu banyak percobaan' });
     let b = req.body;
     if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }
+    if (!auth.valid(b && b.captcha)) return res.status(403).json({ error: 'Selesaikan verifikasi captcha dulu', captcha: true });
     if (!crypto.timingSafeEqual(h(b && b.password), h(process.env.ADMIN_PASSWORD))) return res.status(401).json({ error: 'Password salah' });
     const exp = Date.now() + 8 * 3600 * 1000;
     return res.status(200).json({ token: exp + '.' + sg(exp) });
